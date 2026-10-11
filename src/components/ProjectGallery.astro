@@ -24,6 +24,7 @@ const isSingle = total <= 1;
   class="gallery-container"
   role="region"
   aria-label={`Bildgalleri för ${projectTitle}`}
+  data-lenis-prevent
 >
   <!-- Track -->
   <div
@@ -31,6 +32,7 @@ const isSingle = total <= 1;
     tabindex="0"
     role="region"
     aria-label="Bläddra bland bilder med piltangenter eller scroll"
+    data-lenis-prevent
   >
     {allImages.map((img, idx) => {
       const imgProps = getImageProps(img);

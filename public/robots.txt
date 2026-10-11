@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /porfolio-arquitecto/admin/
+Disallow: /admin/
+
+# OBS: Ändra denna sitemap-URL när den riktiga .se-domänen lanseras
+Sitemap: https://lukacha3.github.io/porfolio-arquitecto/sitemap-index.xml

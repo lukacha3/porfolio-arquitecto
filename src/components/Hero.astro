@@ -130,9 +130,11 @@ const imageProps = featuredProject ? getImageProps(featuredProject.coverImage) :
     transition: transform 1.2s ease;
   }
 
-  .hero-image-box:hover img,
-  .hero-image-box:hover svg {
-    transform: scale(1.05);
+  @media (hover: hover) {
+    .hero-image-box:hover img,
+    .hero-image-box:hover svg {
+      transform: scale(1.035);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

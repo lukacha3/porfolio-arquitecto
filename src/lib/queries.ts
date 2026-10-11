@@ -1,4 +1,4 @@
-import { sanityClient } from 'sanity:client';
+import { getClient } from './sanity';
 
 export interface SanityDimensions {
   width: number;
@@ -62,7 +62,7 @@ export interface SanitySiteSettings {
   featuredProject?: SanityProject | null;
 }
 
-export const PROJECTS_QUERY = `*[_type == "project" && defined(slug.current) && !(_id in path("drafts.**"))] | order(defined(order) desc, order asc, year desc) {
+export const PROJECTS_QUERY = `*[_type == "project" && defined(slug.current)] | order(defined(order) desc, order asc, year desc) {
   _id,
   title,
   "slug": slug.current,
@@ -84,13 +84,13 @@ export const PROJECTS_QUERY = `*[_type == "project" && defined(slug.current) && 
   }
 }`;
 
-export const CATEGORIES_QUERY = `*[_type == "category" && defined(slug.current) && count(*[_type == "project" && references(^._id) && !(_id in path("drafts.**"))]) > 0] | order(title asc) {
+export const CATEGORIES_QUERY = `*[_type == "category" && defined(slug.current) && count(*[_type == "project" && references(^._id)]) > 0] | order(title asc) {
   _id,
   title,
   "slug": slug.current
 }`;
 
-export const SITE_SETTINGS_QUERY = `*[_type == "siteSettings" && !(_id in path("drafts.**"))][0] {
+export const SITE_SETTINGS_QUERY = `*[_type == "siteSettings"][0] {
   studioName,
   headline,
   about,
@@ -121,9 +121,9 @@ export const SITE_SETTINGS_QUERY = `*[_type == "siteSettings" && !(_id in path("
   }
 }`;
 
-export const PROJECT_SLUGS_QUERY = `*[_type == "project" && defined(slug.current) && !(_id in path("drafts.**"))].slug.current`;
+export const PROJECT_SLUGS_QUERY = `*[_type == "project" && defined(slug.current)].slug.current`;
 
-export const PROJECT_BY_SLUG_QUERY = `*[_type == "project" && slug.current == $slug && !(_id in path("drafts.**"))][0] {
+export const PROJECT_BY_SLUG_QUERY = `*[_type == "project" && slug.current == $slug][0] {
   _id,
   title,
   "slug": slug.current,
@@ -159,15 +159,19 @@ export const PROJECT_BY_SLUG_QUERY = `*[_type == "project" && slug.current == $s
 }`;
 
 function checkEnv(): void {
-  const projectId = import.meta.env.PUBLIC_SANITY_PROJECT_ID;
-  const dataset = import.meta.env.PUBLIC_SANITY_DATASET;
+  const projectId =
+    import.meta.env.PUBLIC_SANITY_PROJECT_ID ||
+    (typeof process !== 'undefined' && process.env.PUBLIC_SANITY_PROJECT_ID);
+  const dataset =
+    import.meta.env.PUBLIC_SANITY_DATASET ||
+    (typeof process !== 'undefined' && process.env.PUBLIC_SANITY_DATASET);
 
   if (!projectId || !dataset) {
     const missing: string[] = [];
     if (!projectId) missing.push('PUBLIC_SANITY_PROJECT_ID');
     if (!dataset) missing.push('PUBLIC_SANITY_DATASET');
     throw new Error(
-      `[Sanity] Saknar miljövariabler: ${missing.join(', ')}. Kontrollera din .env eller GitHub Actions repository variables.`
+      `[Sanity] Missing environment variables: ${missing.join(', ')}. Please check your .env or GitHub Actions repository variables.`
     );
   }
 }
@@ -175,10 +179,10 @@ function checkEnv(): void {
 export async function getProjects(): Promise<SanityProject[]> {
   checkEnv();
   try {
-    return await sanityClient.fetch<SanityProject[]>(PROJECTS_QUERY);
+    return await getClient().fetch<SanityProject[]>(PROJECTS_QUERY);
   } catch (error) {
     throw new Error(
-      `[Sanity] Fel vid hämtning av projekt (PROJECTS_QUERY): ${error instanceof Error ? error.message : String(error)}`
+      `[Sanity] Error fetching projects (PROJECTS_QUERY): ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
@@ -186,10 +190,10 @@ export async function getProjects(): Promise<SanityProject[]> {
 export async function getCategories(): Promise<SanityCategory[]> {
   checkEnv();
   try {
-    return await sanityClient.fetch<SanityCategory[]>(CATEGORIES_QUERY);
+    return await getClient().fetch<SanityCategory[]>(CATEGORIES_QUERY);
   } catch (error) {
     throw new Error(
-      `[Sanity] Fel vid hämtning av kategorier (CATEGORIES_QUERY): ${error instanceof Error ? error.message : String(error)}`
+      `[Sanity] Error fetching categories (CATEGORIES_QUERY): ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
@@ -197,10 +201,10 @@ export async function getCategories(): Promise<SanityCategory[]> {
 export async function getSiteSettings(): Promise<SanitySiteSettings | null> {
   checkEnv();
   try {
-    return await sanityClient.fetch<SanitySiteSettings | null>(SITE_SETTINGS_QUERY);
+    return await getClient().fetch<SanitySiteSettings | null>(SITE_SETTINGS_QUERY);
   } catch (error) {
     throw new Error(
-      `[Sanity] Fel vid hämtning av webbplatsinställningar (SITE_SETTINGS_QUERY): ${error instanceof Error ? error.message : String(error)}`
+      `[Sanity] Error fetching site settings (SITE_SETTINGS_QUERY): ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
@@ -208,10 +212,10 @@ export async function getSiteSettings(): Promise<SanitySiteSettings | null> {
 export async function getProjectSlugs(): Promise<string[]> {
   checkEnv();
   try {
-    return await sanityClient.fetch<string[]>(PROJECT_SLUGS_QUERY);
+    return await getClient().fetch<string[]>(PROJECT_SLUGS_QUERY);
   } catch (error) {
     throw new Error(
-      `[Sanity] Fel vid hämtning av projekt-slugs (PROJECT_SLUGS_QUERY): ${error instanceof Error ? error.message : String(error)}`
+      `[Sanity] Error fetching project slugs (PROJECT_SLUGS_QUERY): ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
@@ -219,10 +223,10 @@ export async function getProjectSlugs(): Promise<string[]> {
 export async function getProjectBySlug(slug: string): Promise<SanityProjectDetail | null> {
   checkEnv();
   try {
-    return await sanityClient.fetch<SanityProjectDetail | null>(PROJECT_BY_SLUG_QUERY, { slug });
+    return await getClient().fetch<SanityProjectDetail | null>(PROJECT_BY_SLUG_QUERY, { slug });
   } catch (error) {
     throw new Error(
-      `[Sanity] Fel vid hämtning av projekt "${slug}" (PROJECT_BY_SLUG_QUERY): ${error instanceof Error ? error.message : String(error)}`
+      `[Sanity] Error fetching project "${slug}" (PROJECT_BY_SLUG_QUERY): ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }

@@ -1,0 +1,114 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { site } from "../data/site";
+import { getSiteSettings } from "../lib/queries";
+
+let siteSettings = null;
+try {
+  siteSettings = await getSiteSettings();
+} catch (e) {
+  // Graceful fallback
+}
+
+const studioName = siteSettings?.studioName || site.studioName;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+
+<Layout
+  title={`404 — ${studioName}`}
+  description="Sidan kunde inte hittas."
+>
+  <Header studioName={studioName} />
+
+  <main
+    id="main"
+    style="
+      padding: 120px var(--spacing-gutter) 160px;
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+    "
+  >
+    <span
+      style="
+        font-family: var(--font-mono);
+        font-size: 14px;
+        color: var(--color-accent);
+        margin-bottom: 16px;
+        letter-spacing: 0.08em;
+      "
+    >
+      404
+    </span>
+
+    <h1
+      style="
+        font-size: var(--text-h2);
+        font-weight: 300;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+        margin: 0 0 24px;
+      "
+    >
+      Sidan kunde inte hittas.
+    </h1>
+
+    <p
+      style="
+        font-size: 16px;
+        color: var(--color-muted);
+        max-width: 34ch;
+        margin: 0 0 40px;
+        line-height: 1.5;
+      "
+    >
+      Länken du följde kan vara felaktig eller så har sidan flyttats.
+    </p>
+
+    <a
+      href={`${base}/`}
+      style="
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border: 1px solid var(--color-ink);
+        border-radius: 999px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        background: transparent;
+        color: var(--color-ink);
+        text-decoration: none;
+        transition: background 0.2s, color 0.2s;
+      "
+      class="back-home-btn"
+    >
+      ← Tillbaka till startsidan
+    </a>
+  </main>
+
+  <Footer
+    email={siteSettings?.email}
+    instagram={siteSettings?.instagram}
+    linkedin={siteSettings?.linkedin}
+    copyright={studioName ? `© ${studioName}` : undefined}
+  />
+</Layout>
+
+<style>
+  .back-home-btn:hover {
+    background: var(--color-ink);
+    color: var(--color-ground);
+  }
+
+  .back-home-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+</style>

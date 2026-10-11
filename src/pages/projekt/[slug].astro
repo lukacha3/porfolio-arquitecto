@@ -67,12 +67,27 @@ const descriptionParagraphs = project.description
 
 // Next project image helper
 const nextImage = nextProject ? getImageProps(nextProject.coverImage) : null;
+
+// JSON-LD structured data for Project
+const siteOrigin = Astro.site ? new URL(Astro.site).origin : "https://lukacha3.github.io";
+const projectUrl = new URL(Astro.url.pathname, siteOrigin).href;
+
+const projectJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "VisualArtwork",
+  name: project.title,
+  url: projectUrl,
+  description: project.description || metaDescription,
+  ...(project.year ? { dateCreated: String(project.year) } : {}),
+  ...(project.photographer ? { creator: { "@type": "Person", name: project.photographer } } : {}),
+  ...(ogImageUrl ? { image: ogImageUrl } : {}),
+};
 ---
 
-<Layout title={pageTitle} description={metaDescription} image={ogImageUrl}>
+<Layout title={pageTitle} description={metaDescription} image={ogImageUrl} jsonLd={projectJsonLd}>
   <Header studioName={studioName} />
 
-  <main style="padding-top: 24px;">
+  <main id="main" style="padding-top: 24px;">
     <!-- Back link -->
     <div style="padding: 0 var(--spacing-gutter); margin-bottom: 40px;">
       <a
@@ -306,14 +321,16 @@ const nextImage = nextProject ? getImageProps(nextProject.coverImage) : null;
     transition: transform 1.2s ease;
   }
 
-  .next-project-link:hover .next-project-image-box img,
-  .next-project-link:hover .next-project-image-box svg {
-    transform: scale(1.04);
-  }
+  @media (hover: hover) {
+    .next-project-link:hover .next-project-image-box img,
+    .next-project-link:hover .next-project-image-box svg {
+      transform: scale(1.035);
+    }
 
-  .next-project-link:hover .next-arrow {
-    transform: translateX(8px);
-    opacity: 1 !important;
+    .next-project-link:hover .next-arrow {
+      transform: translateX(8px);
+      opacity: 1 !important;
+    }
   }
 
   .next-arrow {

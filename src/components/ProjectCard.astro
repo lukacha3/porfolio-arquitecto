@@ -100,9 +100,15 @@ const categorySlug = project.category?.slug || "";
     transition: transform 1.2s ease;
   }
 
-  .card-link:hover .card-image img,
-  .card-link:hover .card-image svg {
-    transform: scale(1.05);
+  @media (hover: hover) {
+    .card-link:hover .card-image img,
+    .card-link:hover .card-image svg {
+      transform: scale(1.035);
+    }
+    .card-link:hover .card-arrow {
+      transform: translateX(8px);
+      opacity: 1;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -110,6 +116,7 @@ const categorySlug = project.category?.slug || "";
     .card-image svg { transition: none; }
     .card-link:hover .card-image img,
     .card-link:hover .card-image svg { transform: none; }
+    .card-arrow { transition: none; }
   }
 
   .card-footer {

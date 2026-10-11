@@ -5,7 +5,9 @@ import Hero from "../components/Hero.astro";
 import ProjectGrid from "../components/ProjectGrid.astro";
 import StudioSection from "../components/StudioSection.astro";
 import Footer from "../components/Footer.astro";
+import { site } from "../data/site";
 import { getProjects, getCategories, getSiteSettings } from "../lib/queries";
+import { urlFor } from "../lib/sanity";
 
 const [projects, categories, siteSettings] = await Promise.all([
   getProjects(),
@@ -14,14 +16,36 @@ const [projects, categories, siteSettings] = await Promise.all([
 ]);
 
 const featuredProject = siteSettings?.featuredProject || projects[0] || null;
+
+// OG Image
+const ogImage = featuredProject?.coverImage?.asset
+  ? urlFor(featuredProject.coverImage).width(1200).auto("format").quality(85).url()
+  : undefined;
+
+// JSON-LD structured data for Home
+const siteOrigin = Astro.site ? new URL(Astro.site).origin : "https://lukacha3.github.io";
+const sameAs = [siteSettings?.instagram, siteSettings?.linkedin].filter(Boolean) as string[];
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: siteSettings?.studioName || site.studioName,
+  url: siteOrigin,
+  description: siteSettings?.about || site.page.description,
+  ...(siteSettings?.email ? { email: siteSettings.email } : {}),
+  ...(sameAs.length > 0 ? { sameAs } : {}),
+};
 ---
 
 <Layout
   title={siteSettings?.studioName ? `${siteSettings.studioName} — Arkitektur` : undefined}
+  description={siteSettings?.about || site.page.description}
+  image={ogImage}
+  jsonLd={organizationJsonLd}
 >
   <Header studioName={siteSettings?.studioName} />
 
-  <main>
+  <main id="main">
     <Hero
       headline={siteSettings?.headline}
       featuredProject={featuredProject}
