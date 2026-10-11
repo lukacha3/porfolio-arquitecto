@@ -1,0 +1,116 @@
+---
+import { site } from "../data/site";
+import { projects } from "../data/projects";
+import PlaceholderArt from "./PlaceholderArt.astro";
+
+const hero = projects[0];
+const total = projects.length;
+---
+
+<section
+  style="
+    padding: 56px var(--spacing-gutter) 0;
+  "
+>
+  <!-- Heading -->
+  <h1
+    style="
+      font-size: var(--text-display);
+      font-weight: 300;
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      max-width: 13ch;
+      margin: 0 0 40px;
+    "
+  >
+    {site.hero.heading}
+  </h1>
+
+  <!-- Data row -->
+  <div
+    style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-muted);
+    "
+  >
+    <span>{site.hero.dataLabelLeft}</span>
+    <span>{total} projekt</span>
+  </div>
+
+  <!-- Hero image -->
+  <a
+    href={`#`}
+    class="reveal"
+    style="display: block;"
+    aria-label={hero.title}
+  >
+    <div
+      class="hero-image-box"
+      style={`background: ${hero.tone}; color: var(--color-ink);`}
+    >
+      <PlaceholderArt variant="hero" id={hero.slug} />
+    </div>
+  </a>
+
+  <!-- Image caption -->
+  <div
+    style="
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-top: 16px;
+    "
+  >
+    <span style="font-size: 22px; letter-spacing: -0.01em;">{hero.title}</span>
+    <span
+      style="
+        font-family: var(--font-mono);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--color-muted);
+      "
+    >
+      {hero.category} · {hero.year}
+    </span>
+  </div>
+</section>
+
+<style>
+  .hero-image-box {
+    overflow: hidden;
+    aspect-ratio: 2 / 1;
+    min-height: 320px;
+  }
+
+  .hero-image-box svg {
+    transition: transform 1.2s ease;
+  }
+
+  .hero-image-box:hover svg {
+    transform: scale(1.05);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-image-box svg {
+      transition: none;
+    }
+    .hero-image-box:hover svg {
+      transform: none;
+    }
+  }
+
+  a:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+</style>

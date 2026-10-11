@@ -1,173 +1,20 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import ProjectGrid from "../components/ProjectGrid.astro";
+import StudioSection from "../components/StudioSection.astro";
+import Footer from "../components/Footer.astro";
 ---
 
-<Layout title="Fas 1 — Systemkontroll" description="Visuell kontroll av typografi, färger och tokens.">
+<Layout>
+  <Header />
 
-  <!-- Entrance animation wrapper -->
-  <main class="reveal" style="padding: var(--spacing-gutter); max-width: 1440px; margin: 0 auto;">
-
-    <!-- Display heading — weight 300, fluid, template tracking + leading -->
-    <h1
-      style="
-        font-size: var(--text-display);
-        font-weight: 300;
-        line-height: 1.02;
-        letter-spacing: -0.035em;
-        margin-bottom: 3rem;
-      "
-    >
-      Arkitektens&nbsp;Portfolio
-    </h1>
-
-    <!-- Type specimens ─────────────────────────────────── -->
-    <section style="margin-bottom: 3rem;">
-      <h2
-        style="
-          font-size: var(--text-h2);
-          font-weight: 300;
-          margin-bottom: 1rem;
-        "
-      >
-        Typografi
-      </h2>
-
-      <!-- Hanken Grotesk specimen -->
-      <p style="font-family: var(--font-sans); font-weight: 300; margin-bottom: 0.25rem;">
-        Hanken Grotesk 300 — Åäö ÅÄÖ 0123
-      </p>
-      <p style="font-family: var(--font-sans); font-weight: 400; margin-bottom: 0.25rem;">
-        Hanken Grotesk 400 — Åäö ÅÄÖ 0123
-      </p>
-      <p style="font-family: var(--font-sans); font-weight: 500; margin-bottom: 1rem;">
-        Hanken Grotesk 500 — Åäö ÅÄÖ 0123
-      </p>
-
-      <!-- DM Mono specimen -->
-      <p style="font-family: var(--font-mono); font-weight: 400;">
-        DM Mono 400 — Åäö ÅÄÖ 0123
-      </p>
-    </section>
-
-    <!-- Color swatches ─────────────────────────────────── -->
-    <section style="margin-bottom: 3rem;">
-      <h2
-        style="
-          font-size: var(--text-h2);
-          font-weight: 300;
-          margin-bottom: 1.5rem;
-        "
-      >
-        Färger
-      </h2>
-
-      <div
-        style="
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-          gap: 1rem;
-        "
-      >
-        <!-- ground -->
-        <div>
-          <div
-            style="
-              background: var(--color-ground);
-              border: 1px solid var(--color-line);
-              height: 80px;
-              border-radius: 4px;
-              margin-bottom: 0.5rem;
-            "
-          ></div>
-          <p style="font-family: var(--font-mono); font-size: 0.75rem;">ground</p>
-          <p style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-muted);">#ECEAE5</p>
-        </div>
-
-        <!-- ink -->
-        <div>
-          <div
-            style="
-              background: var(--color-ink);
-              height: 80px;
-              border-radius: 4px;
-              margin-bottom: 0.5rem;
-            "
-          ></div>
-          <p style="font-family: var(--font-mono); font-size: 0.75rem;">ink</p>
-          <p style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-muted);">#1B1B19</p>
-        </div>
-
-        <!-- muted -->
-        <div>
-          <div
-            style="
-              background: var(--color-muted);
-              height: 80px;
-              border-radius: 4px;
-              margin-bottom: 0.5rem;
-            "
-          ></div>
-          <p style="font-family: var(--font-mono); font-size: 0.75rem;">muted</p>
-          <p style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-muted);">#6B6962</p>
-        </div>
-
-        <!-- line -->
-        <div>
-          <div
-            style="
-              background: var(--color-line);
-              border: 1px solid var(--color-line);
-              height: 80px;
-              border-radius: 4px;
-              margin-bottom: 0.5rem;
-            "
-          ></div>
-          <p style="font-family: var(--font-mono); font-size: 0.75rem;">line</p>
-          <p style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-muted);">#CFCCC4</p>
-        </div>
-
-        <!-- accent -->
-        <div>
-          <div
-            style="
-              background: var(--color-accent);
-              height: 80px;
-              border-radius: 4px;
-              margin-bottom: 0.5rem;
-            "
-          ></div>
-          <p style="font-family: var(--font-mono); font-size: 0.75rem;">accent</p>
-          <p style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-muted);">#5B6B4F</p>
-        </div>
-
-        <!-- ink-soft (dark background) -->
-        <div>
-          <div
-            style="
-              background: var(--color-ink-soft);
-              height: 80px;
-              border-radius: 4px;
-              margin-bottom: 0.5rem;
-            "
-          ></div>
-          <p style="font-family: var(--font-mono); font-size: 0.75rem;">ink-soft</p>
-          <p style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-muted);">#A9A69D</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Animation check ─────────────────────────────────── -->
-    <section>
-      <p
-        style="
-          font-size: var(--text-statement);
-          font-weight: 300;
-          color: var(--color-accent);
-        "
-      >
-        Animationen fungerar — detta element steg upp vid laddning.
-      </p>
-    </section>
-
+  <main>
+    <Hero />
+    <ProjectGrid />
+    <StudioSection />
   </main>
+
+  <Footer />
 </Layout>

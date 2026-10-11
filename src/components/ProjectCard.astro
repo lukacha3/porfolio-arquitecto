@@ -1,0 +1,129 @@
+---
+import { type Project } from "../data/projects";
+import PlaceholderArt from "./PlaceholderArt.astro";
+
+interface Props {
+  project: Project;
+  position: number; // 0-based position among visible cards (for width logic)
+  index: number;    // 0-based global index (for 01, 02… numbering)
+}
+
+const { project, position, index } = Astro.props;
+
+// Wide: position % 4 === 0 or 3 ; Narrow: otherwise
+const isWide = position % 4 === 0 || position % 4 === 3;
+const delay = position * 80; // ms
+
+const displayNumber = String(index + 1).padStart(2, "0");
+---
+
+<li
+  class="project-card reveal"
+  data-category={project.category}
+  style={`
+    flex: ${isWide ? "1.7 1 520px" : "1 1 300px"};
+    min-width: 0;
+    animation-delay: ${delay}ms;
+  `}
+>
+  {/* TODO: change href to `/projekt/${project.slug}` in phase 5 */}
+  <a href="#" class="card-link" aria-label={project.title}>
+    <!-- Image box -->
+    <div
+      class="card-image"
+      style={`background: ${project.tone}; color: var(--color-ink);`}
+    >
+      <PlaceholderArt variant={project.art} id={project.slug} />
+    </div>
+
+    <!-- Card footer -->
+    <div class="card-footer">
+      <div class="card-footer-left">
+        <span class="card-number">{displayNumber}</span>
+        <span class="card-title">{project.title}</span>
+        <span class="card-arrow" aria-hidden="true">→</span>
+      </div>
+      <span class="card-meta">{project.category} · {project.year}</span>
+    </div>
+  </a>
+</li>
+
+<style>
+  .card-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .card-link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  .card-image {
+    height: 440px;
+    overflow: hidden;
+  }
+
+  .card-image svg {
+    transition: transform 1.2s ease;
+  }
+
+  .card-link:hover .card-image svg {
+    transform: scale(1.05);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-image svg { transition: none; }
+    .card-link:hover .card-image svg { transform: none; }
+  }
+
+  .card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-top: 16px;
+    gap: 8px;
+  }
+
+  .card-footer-left {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .card-number {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  .card-title {
+    font-size: 22px;
+    letter-spacing: -0.01em;
+  }
+
+  .card-arrow {
+    display: inline-block;
+    font-size: 18px;
+    transform: translateX(0);
+    opacity: 0.5;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .card-link:hover .card-arrow {
+    transform: translateX(8px);
+    opacity: 1;
+  }
+
+  .card-meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+  }
+</style>

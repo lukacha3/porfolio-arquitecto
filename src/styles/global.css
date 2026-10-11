@@ -53,6 +53,19 @@
   *::after {
     box-sizing: border-box;
   }
+
+  /* Global focus-visible ring using accent color */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  img,
+  svg {
+    max-width: 100%;
+    display: block;
+  }
 }
 
 /* ── Entrance animation ────────────────────────────────────── */

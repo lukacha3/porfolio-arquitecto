@@ -1,0 +1,81 @@
+---
+import { site } from "../data/site";
+---
+
+<header
+  style="
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px var(--spacing-gutter);
+  "
+>
+  <!-- Studio name -->
+  <a
+    href="/"
+    style="
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      padding: 12px 0;
+      line-height: 1;
+    "
+  >
+    {site.studioName}
+  </a>
+
+  <!-- Navigation -->
+  <nav aria-label="Huvudnavigation">
+    <ul
+      style="
+        display: flex;
+        gap: 32px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      "
+    >
+      {site.nav.map((item) => (
+        <li>
+          <a
+            href={item.href}
+            class="nav-link"
+            style="
+              font-family: var(--font-mono);
+              font-size: 12px;
+              text-transform: uppercase;
+              letter-spacing: 0.08em;
+              padding: 12px 0;
+              display: inline-block;
+            "
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .nav-link {
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+  }
+  .nav-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 6px;
+  }
+  .nav-link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+  a:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+</style>

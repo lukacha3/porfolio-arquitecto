@@ -6,6 +6,10 @@ Sitio web de portfolio en Astro — solo en sueco.
 
 Base del proyecto: Astro + Tailwind v4 + fuentes autoalojadas (Hanken Grotesk y DM Mono) + layout + tokens del template.
 
+## Fase 2 
+
+Home estática portada del template: Header, Hero, ProjectGrid (con filtro por categoría), StudioSection y Footer. Textos en sueco. Datos de ejemplo en `src/data/`.
+
 ## Comandos
 
 ```bash

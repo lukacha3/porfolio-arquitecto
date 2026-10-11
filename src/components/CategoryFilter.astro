@@ -1,0 +1,63 @@
+---
+import { site } from "../data/site";
+import { categories } from "../data/projects";
+---
+
+<div class="filter-row">
+  <button
+    type="button"
+    class="filter-btn active"
+    data-category="all"
+    aria-pressed="true"
+  >
+    {site.projects.filterAll}
+  </button>
+  {categories.map((cat) => (
+    <button
+      type="button"
+      class="filter-btn"
+      data-category={cat}
+      aria-pressed="false"
+    >
+      {cat}
+    </button>
+  ))}
+</div>
+
+<style>
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter-btn {
+    min-height: 44px;
+    padding: 0 20px;
+    border: 1px solid var(--color-ink);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: transparent;
+    color: var(--color-ink);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .filter-btn.active,
+  .filter-btn[aria-pressed="true"] {
+    background: var(--color-ink);
+    color: var(--color-ground);
+  }
+
+  .filter-btn:hover:not(.active) {
+    opacity: 0.7;
+  }
+
+  .filter-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+</style>

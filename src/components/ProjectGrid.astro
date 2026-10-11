@@ -1,0 +1,133 @@
+---
+import { site } from "../data/site";
+import { projects } from "../data/projects";
+import CategoryFilter from "./CategoryFilter.astro";
+import ProjectCard from "./ProjectCard.astro";
+---
+
+<section
+  id="projekt"
+  style="padding: 140px var(--spacing-gutter) 0;"
+>
+  <!-- Section header -->
+  <div
+    class="grid-header"
+    style="
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 24px;
+      margin-bottom: 40px;
+    "
+  >
+    <div style="flex: 1 1 auto;">
+      <h2
+        style="
+          font-size: var(--text-h2);
+          font-weight: 300;
+          letter-spacing: -0.03em;
+          margin: 0 0 8px;
+        "
+      >
+        {site.projects.sectionTitle}
+      </h2>
+      <p
+        id="project-count"
+        aria-live="polite"
+        style="
+          font-family: var(--font-mono);
+          font-size: 12px;
+          color: var(--color-muted);
+          margin: 0;
+        "
+      >
+        {projects.length} projekt
+      </p>
+    </div>
+
+    <CategoryFilter />
+  </div>
+
+  <!-- Project grid -->
+  <ul
+    id="project-grid"
+    style="
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      row-gap: 56px;
+      column-gap: 24px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    "
+  >
+    {projects.map((project, index) => (
+      <ProjectCard project={project} position={index} index={index} />
+    ))}
+  </ul>
+</section>
+
+<script>
+  // ── Filter logic (vanilla JS, no framework) ───────────────────────────────
+
+  const grid      = document.getElementById("project-grid")!;
+  const countEl   = document.getElementById("project-count")!;
+  const filterBtns = document.querySelectorAll<HTMLButtonElement>(".filter-btn");
+
+  /** Recalculate flex widths for currently visible cards */
+  function recalcWidths() {
+    const visible = [...grid.querySelectorAll<HTMLLIElement>(".project-card")]
+      .filter((li) => li.style.display !== "none");
+
+    visible.forEach((li, pos) => {
+      const isWide = pos % 4 === 0 || pos % 4 === 3;
+      li.style.flex = isWide ? "1.7 1 520px" : "1 1 300px";
+    });
+
+    return visible.length;
+  }
+
+  /** Replay reveal animation on visible cards */
+  function replayReveal() {
+    const visible = [...grid.querySelectorAll<HTMLLIElement>(".project-card")]
+      .filter((li) => li.style.display !== "none");
+
+    visible.forEach((li, pos) => {
+      li.classList.remove("reveal");
+      // Force reflow so the browser registers the class removal
+      void (li as HTMLElement).offsetWidth;
+      li.style.animationDelay = `${pos * 80}ms`;
+      li.classList.add("reveal");
+    });
+  }
+
+  function applyFilter(category: string) {
+    const cards = [...grid.querySelectorAll<HTMLLIElement>(".project-card")];
+
+    cards.forEach((li) => {
+      const match = category === "all" || li.dataset.category === category;
+      li.style.display = match ? "" : "none";
+    });
+
+    const visibleCount = recalcWidths();
+
+    // Update count label
+    countEl.textContent = `${visibleCount} projekt`;
+
+    // Update aria-pressed on buttons
+    filterBtns.forEach((btn) => {
+      const pressed = btn.dataset.category === category;
+      btn.setAttribute("aria-pressed", String(pressed));
+      btn.classList.toggle("active", pressed);
+    });
+
+    replayReveal();
+  }
+
+  filterBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      applyFilter(btn.dataset.category ?? "all");
+    });
+  });
+</script>
