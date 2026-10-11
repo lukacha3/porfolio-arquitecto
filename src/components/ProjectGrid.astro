@@ -1,8 +1,15 @@
 ---
 import { site } from "../data/site";
-import { projects } from "../data/projects";
+import type { SanityProject, SanityCategory } from "../lib/queries";
 import CategoryFilter from "./CategoryFilter.astro";
 import ProjectCard from "./ProjectCard.astro";
+
+interface Props {
+  projects: SanityProject[];
+  categories: SanityCategory[];
+}
+
+const { projects, categories } = Astro.props;
 ---
 
 <section
@@ -45,89 +52,103 @@ import ProjectCard from "./ProjectCard.astro";
       </p>
     </div>
 
-    <CategoryFilter />
+    {categories.length > 0 && <CategoryFilter categories={categories} />}
   </div>
 
-  <!-- Project grid -->
-  <ul
-    id="project-grid"
-    style="
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      row-gap: 56px;
-      column-gap: 24px;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    "
-  >
-    {projects.map((project, index) => (
-      <ProjectCard project={project} position={index} index={index} />
-    ))}
-  </ul>
+  <!-- Project grid or empty state -->
+  {projects.length === 0 ? (
+    <p
+      style="
+        font-family: var(--font-mono);
+        font-size: 14px;
+        color: var(--color-muted);
+        padding: 40px 0;
+      "
+    >
+      {site.projects.emptyState}
+    </p>
+  ) : (
+    <ul
+      id="project-grid"
+      style="
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        row-gap: 56px;
+        column-gap: 24px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      "
+    >
+      {projects.map((project, index) => (
+        <ProjectCard project={project} position={index} index={index} isFirst={index === 0} />
+      ))}
+    </ul>
+  )}
 </section>
 
-<script>
-  // ── Filter logic (vanilla JS, no framework) ───────────────────────────────
+{projects.length > 0 && (
+  <script>
+    // ── Filter logic (vanilla JS, no framework) ───────────────────────────────
 
-  const grid      = document.getElementById("project-grid")!;
-  const countEl   = document.getElementById("project-count")!;
-  const filterBtns = document.querySelectorAll<HTMLButtonElement>(".filter-btn");
+    const grid       = document.getElementById("project-grid");
+    const countEl    = document.getElementById("project-count");
+    const filterBtns = document.querySelectorAll<HTMLButtonElement>(".filter-btn");
 
-  /** Recalculate flex widths for currently visible cards */
-  function recalcWidths() {
-    const visible = [...grid.querySelectorAll<HTMLLIElement>(".project-card")]
-      .filter((li) => li.style.display !== "none");
+    if (grid && countEl && filterBtns.length > 0) {
+      /** Recalculate flex widths for currently visible cards */
+      function recalcWidths() {
+        const visible = [...grid!.querySelectorAll<HTMLLIElement>(".project-card")]
+          .filter((li) => li.style.display !== "none");
 
-    visible.forEach((li, pos) => {
-      const isWide = pos % 4 === 0 || pos % 4 === 3;
-      li.style.flex = isWide ? "1.7 1 520px" : "1 1 300px";
-    });
+        visible.forEach((li, pos) => {
+          const isWide = pos % 4 === 0 || pos % 4 === 3;
+          li.style.flex = isWide ? "1.7 1 520px" : "1 1 300px";
+        });
 
-    return visible.length;
-  }
+        return visible.length;
+      }
 
-  /** Replay reveal animation on visible cards */
-  function replayReveal() {
-    const visible = [...grid.querySelectorAll<HTMLLIElement>(".project-card")]
-      .filter((li) => li.style.display !== "none");
+      /** Replay reveal animation on visible cards */
+      function replayReveal() {
+        const visible = [...grid!.querySelectorAll<HTMLLIElement>(".project-card")]
+          .filter((li) => li.style.display !== "none");
 
-    visible.forEach((li, pos) => {
-      li.classList.remove("reveal");
-      // Force reflow so the browser registers the class removal
-      void (li as HTMLElement).offsetWidth;
-      li.style.animationDelay = `${pos * 80}ms`;
-      li.classList.add("reveal");
-    });
-  }
+        visible.forEach((li, pos) => {
+          li.classList.remove("reveal");
+          void (li as HTMLElement).offsetWidth;
+          li.style.animationDelay = `${pos * 80}ms`;
+          li.classList.add("reveal");
+        });
+      }
 
-  function applyFilter(category: string) {
-    const cards = [...grid.querySelectorAll<HTMLLIElement>(".project-card")];
+      function applyFilter(category: string) {
+        const cards = [...grid!.querySelectorAll<HTMLLIElement>(".project-card")];
 
-    cards.forEach((li) => {
-      const match = category === "all" || li.dataset.category === category;
-      li.style.display = match ? "" : "none";
-    });
+        cards.forEach((li) => {
+          const match = category === "all" || li.dataset.category === category;
+          li.style.display = match ? "" : "none";
+        });
 
-    const visibleCount = recalcWidths();
+        const visibleCount = recalcWidths();
 
-    // Update count label
-    countEl.textContent = `${visibleCount} projekt`;
+        countEl!.textContent = `${visibleCount} projekt`;
 
-    // Update aria-pressed on buttons
-    filterBtns.forEach((btn) => {
-      const pressed = btn.dataset.category === category;
-      btn.setAttribute("aria-pressed", String(pressed));
-      btn.classList.toggle("active", pressed);
-    });
+        filterBtns.forEach((btn) => {
+          const pressed = btn.dataset.category === category;
+          btn.setAttribute("aria-pressed", String(pressed));
+          btn.classList.toggle("active", pressed);
+        });
 
-    replayReveal();
-  }
+        replayReveal();
+      }
 
-  filterBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      applyFilter(btn.dataset.category ?? "all");
-    });
-  });
-</script>
+      filterBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          applyFilter(btn.dataset.category ?? "all");
+        });
+      });
+    }
+  </script>
+)}

@@ -1,6 +1,12 @@
 ---
 import { site } from "../data/site";
-import { categories } from "../data/projects";
+import type { SanityCategory } from "../lib/queries";
+
+interface Props {
+  categories: SanityCategory[];
+}
+
+const { categories } = Astro.props;
 ---
 
 <div class="filter-row">
@@ -16,10 +22,10 @@ import { categories } from "../data/projects";
     <button
       type="button"
       class="filter-btn"
-      data-category={cat}
+      data-category={cat.slug}
       aria-pressed="false"
     >
-      {cat}
+      {cat.title}
     </button>
   ))}
 </div>

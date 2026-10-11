@@ -5,16 +5,42 @@ import Hero from "../components/Hero.astro";
 import ProjectGrid from "../components/ProjectGrid.astro";
 import StudioSection from "../components/StudioSection.astro";
 import Footer from "../components/Footer.astro";
+import { getProjects, getCategories, getSiteSettings } from "../lib/queries";
+
+const [projects, categories, siteSettings] = await Promise.all([
+  getProjects(),
+  getCategories(),
+  getSiteSettings(),
+]);
+
+const featuredProject = siteSettings?.featuredProject || projects[0] || null;
 ---
 
-<Layout>
-  <Header />
+<Layout
+  title={siteSettings?.studioName ? `${siteSettings.studioName} — Arkitektur` : undefined}
+>
+  <Header studioName={siteSettings?.studioName} />
 
   <main>
-    <Hero />
-    <ProjectGrid />
-    <StudioSection />
+    <Hero
+      headline={siteSettings?.headline}
+      featuredProject={featuredProject}
+      totalProjects={projects.length}
+    />
+    <ProjectGrid
+      projects={projects}
+      categories={categories}
+    />
+    <StudioSection
+      about={siteSettings?.about}
+      services={siteSettings?.services}
+    />
   </main>
 
-  <Footer />
+  <Footer
+    email={siteSettings?.email}
+    instagram={siteSettings?.instagram}
+    linkedin={siteSettings?.linkedin}
+    copyright={siteSettings?.studioName ? `© ${siteSettings.studioName}` : undefined}
+  />
 </Layout>

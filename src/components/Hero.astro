@@ -1,10 +1,18 @@
 ---
 import { site } from "../data/site";
-import { projects } from "../data/projects";
+import type { SanityProject } from "../lib/queries";
+import { getImageProps } from "../lib/images";
 import PlaceholderArt from "./PlaceholderArt.astro";
 
-const hero = projects[0];
-const total = projects.length;
+interface Props {
+  headline?: string | null;
+  featuredProject?: SanityProject | null;
+  totalProjects?: number;
+}
+
+const { headline, featuredProject, totalProjects = 0 } = Astro.props;
+const displayHeading = headline || site.hero.heading;
+const imageProps = featuredProject ? getImageProps(featuredProject.coverImage) : null;
 ---
 
 <section
@@ -23,7 +31,7 @@ const total = projects.length;
       margin: 0 0 40px;
     "
   >
-    {site.hero.heading}
+    {displayHeading}
   </h1>
 
   <!-- Data row -->
@@ -41,47 +49,72 @@ const total = projects.length;
     "
   >
     <span>{site.hero.dataLabelLeft}</span>
-    <span>{total} projekt</span>
+    <span>{totalProjects} projekt</span>
   </div>
 
   <!-- Hero image -->
+  {/* TODO: change href to `/projekt/${featuredProject.slug}` in phase 5 */}
   <a
-    href={`#`}
+    href="#"
     class="reveal"
     style="display: block;"
-    aria-label={hero.title}
+    aria-label={featuredProject?.title || displayHeading}
   >
     <div
       class="hero-image-box"
-      style={`background: ${hero.tone}; color: var(--color-ink);`}
+      style="background: var(--color-surface, #e5e5e5); color: var(--color-ink);"
     >
-      <PlaceholderArt variant="hero" id={hero.slug} />
+      {imageProps ? (
+        <img
+          src={imageProps.src}
+          srcset={imageProps.srcset}
+          sizes="100vw"
+          width={imageProps.width}
+          height={imageProps.height}
+          alt={imageProps.alt}
+          loading="eager"
+          fetchpriority="high"
+          style={`
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: ${imageProps.objectPosition};
+            display: block;
+          `}
+        />
+      ) : (
+        <PlaceholderArt variant="hero" id={featuredProject?.slug || "hero"} />
+      )}
     </div>
   </a>
 
   <!-- Image caption -->
-  <div
-    style="
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: baseline;
-      padding-top: 16px;
-    "
-  >
-    <span style="font-size: 22px; letter-spacing: -0.01em;">{hero.title}</span>
-    <span
+  {featuredProject && (
+    <div
       style="
-        font-family: var(--font-mono);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--color-muted);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: baseline;
+        padding-top: 16px;
       "
     >
-      {hero.category} · {hero.year}
-    </span>
-  </div>
+      <span style="font-size: 22px; letter-spacing: -0.01em;">{featuredProject.title}</span>
+      {(featuredProject.category?.title || featuredProject.year) && (
+        <span
+          style="
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-muted);
+          "
+        >
+          {[featuredProject.category?.title, featuredProject.year].filter(Boolean).join(" · ")}
+        </span>
+      )}
+    </div>
+  )}
 </section>
 
 <style>
@@ -91,18 +124,22 @@ const total = projects.length;
     min-height: 320px;
   }
 
+  .hero-image-box img,
   .hero-image-box svg {
     transition: transform 1.2s ease;
   }
 
+  .hero-image-box:hover img,
   .hero-image-box:hover svg {
     transform: scale(1.05);
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .hero-image-box img,
     .hero-image-box svg {
       transition: none;
     }
+    .hero-image-box:hover img,
     .hero-image-box:hover svg {
       transform: none;
     }

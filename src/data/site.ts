@@ -1,5 +1,4 @@
-// NOTE: All Swedish texts are PROVISIONAL — please have a native speaker review
-// before publishing.
+// Fixed UI texts and default fallbacks for content managed in Sanity.
 
 export const site = {
   studioName: "Pedro Forsberg Arkitekt",
@@ -13,17 +12,18 @@ export const site = {
   hero: {
     heading: "Byggnader som växer ur platsen.",
     dataLabelLeft: "Utvalda projekt",
-    // dataLabelRight is built dynamically: `${total} projekt`
   },
 
   projects: {
     sectionTitle: "Projekt",
     filterAll: "Alla",
+    emptyState: "Inga projekt ännu.",
   },
 
   studio: {
     label: "Studion",
-    statement: "Arkitektstudio som följer projektet hela vägen, från första skiss till byggledning. Färre gester, mer precision.",
+    statement:
+      "Arkitektstudio som följer projektet hela vägen, från första skiss till byggledning. Färre gester, mer precision.",
     services: [
       { number: "01", name: "Projektering", body: "Förslag, bygghandlingar och bygglov." },
       { number: "02", name: "Byggledning", body: "Uppföljning på byggplatsen och kvalitetskontroll." },
@@ -35,10 +35,6 @@ export const site = {
     closing: "Hör av dig om ditt projekt.",
     email: "hej@exempel.se",
     copyright: "© Pedro Forsberg Arkitekt",
-    socials: [
-      { label: "Instagram", href: "#" },
-      { label: "LinkedIn", href: "#" },
-    ],
   },
 
   page: {

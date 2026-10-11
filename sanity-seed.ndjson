@@ -1,0 +1,3 @@
+{"_id":"category-bostad","_type":"category","title":"Bostad","slug":{"_type":"slug","current":"bostad"}}
+{"_id":"category-kultur","_type":"category","title":"Kultur","slug":{"_type":"slug","current":"kultur"}}
+{"_id":"category-interior","_type":"category","title":"Interiör","slug":{"_type":"slug","current":"interior"}}

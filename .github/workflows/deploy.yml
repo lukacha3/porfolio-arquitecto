@@ -18,6 +18,9 @@ jobs:
         uses: actions/checkout@v7
       - name: Install, build, and upload your site
         uses: withastro/action@v6
+        env:
+          PUBLIC_SANITY_PROJECT_ID: ${{ vars.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ vars.PUBLIC_SANITY_DATASET }}
 
   deploy:
     needs: build

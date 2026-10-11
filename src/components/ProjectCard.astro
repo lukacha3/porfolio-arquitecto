@@ -1,25 +1,29 @@
 ---
-import { type Project } from "../data/projects";
+import type { SanityProject } from "../lib/queries";
+import { getImageProps } from "../lib/images";
 import PlaceholderArt from "./PlaceholderArt.astro";
 
 interface Props {
-  project: Project;
+  project: SanityProject;
   position: number; // 0-based position among visible cards (for width logic)
   index: number;    // 0-based global index (for 01, 02… numbering)
+  isFirst?: boolean;
 }
 
-const { project, position, index } = Astro.props;
+const { project, position, index, isFirst = false } = Astro.props;
 
 // Wide: position % 4 === 0 or 3 ; Narrow: otherwise
 const isWide = position % 4 === 0 || position % 4 === 3;
 const delay = position * 80; // ms
 
 const displayNumber = String(index + 1).padStart(2, "0");
+const imageProps = getImageProps(project.coverImage);
+const categorySlug = project.category?.slug || "";
 ---
 
 <li
   class="project-card reveal"
-  data-category={project.category}
+  data-category={categorySlug}
   style={`
     flex: ${isWide ? "1.7 1 520px" : "1 1 300px"};
     min-width: 0;
@@ -31,9 +35,30 @@ const displayNumber = String(index + 1).padStart(2, "0");
     <!-- Image box -->
     <div
       class="card-image"
-      style={`background: ${project.tone}; color: var(--color-ink);`}
+      style="background: var(--color-surface, #e5e5e5); color: var(--color-ink);"
     >
-      <PlaceholderArt variant={project.art} id={project.slug} />
+      {imageProps ? (
+        <img
+          src={imageProps.src}
+          srcset={imageProps.srcset}
+          sizes={isWide ? "(min-width: 1024px) 60vw, 100vw" : "(min-width: 1024px) 35vw, 100vw"}
+          width={imageProps.width}
+          height={imageProps.height}
+          alt={imageProps.alt}
+          loading={isFirst ? "eager" : "lazy"}
+          decoding={isFirst ? "auto" : "async"}
+          fetchpriority={isFirst ? "high" : "auto"}
+          style={`
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: ${imageProps.objectPosition};
+            display: block;
+          `}
+        />
+      ) : (
+        <PlaceholderArt variant="a" id={project.slug} />
+      )}
     </div>
 
     <!-- Card footer -->
@@ -43,7 +68,11 @@ const displayNumber = String(index + 1).padStart(2, "0");
         <span class="card-title">{project.title}</span>
         <span class="card-arrow" aria-hidden="true">→</span>
       </div>
-      <span class="card-meta">{project.category} · {project.year}</span>
+      {(project.category?.title || project.year) && (
+        <span class="card-meta">
+          {[project.category?.title, project.year].filter(Boolean).join(" · ")}
+        </span>
+      )}
     </div>
   </a>
 </li>
@@ -66,16 +95,20 @@ const displayNumber = String(index + 1).padStart(2, "0");
     overflow: hidden;
   }
 
+  .card-image img,
   .card-image svg {
     transition: transform 1.2s ease;
   }
 
+  .card-link:hover .card-image img,
   .card-link:hover .card-image svg {
     transform: scale(1.05);
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .card-image img,
     .card-image svg { transition: none; }
+    .card-link:hover .card-image img,
     .card-link:hover .card-image svg { transform: none; }
   }
 

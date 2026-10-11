@@ -1,5 +1,13 @@
 ---
 import { site } from "../data/site";
+
+interface Props {
+  studioName?: string | null;
+}
+
+const { studioName } = Astro.props;
+const displayName = studioName || site.studioName;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 ---
 
 <header
@@ -13,7 +21,7 @@ import { site } from "../data/site";
 >
   <!-- Studio name -->
   <a
-    href="/"
+    href={`${base}/`}
     style="
       font-size: 15px;
       font-weight: 500;
@@ -22,7 +30,7 @@ import { site } from "../data/site";
       line-height: 1;
     "
   >
-    {site.studioName}
+    {displayName}
   </a>
 
   <!-- Navigation -->

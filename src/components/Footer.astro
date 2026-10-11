@@ -1,5 +1,21 @@
 ---
 import { site } from "../data/site";
+
+interface Props {
+  email?: string | null;
+  instagram?: string | null;
+  linkedin?: string | null;
+  copyright?: string | null;
+}
+
+const { email, instagram, linkedin, copyright } = Astro.props;
+const displayEmail = email || site.footer.email;
+const displayCopyright = copyright || site.footer.copyright;
+
+const socials = [
+  instagram && { label: "Instagram", href: instagram },
+  linkedin && { label: "LinkedIn", href: linkedin },
+].filter(Boolean) as { label: string; href: string }[];
 ---
 
 <footer
@@ -26,7 +42,7 @@ import { site } from "../data/site";
 
   <!-- Email link -->
   <a
-    href={`mailto:${site.footer.email}`}
+    href={`mailto:${displayEmail}`}
     style="
       display: inline-block;
       margin-top: 48px;
@@ -38,7 +54,7 @@ import { site } from "../data/site";
     "
     class="email-link"
   >
-    {site.footer.email}
+    {displayEmail}
   </a>
 
   <!-- Bottom row -->
@@ -57,31 +73,35 @@ import { site } from "../data/site";
       gap: 16px;
     "
   >
-    <span>{site.footer.copyright}</span>
+    <span>{displayCopyright}</span>
 
-    <nav aria-label="Sociala medier">
-      <ul
-        style="
-          display: flex;
-          gap: 32px;
-          list-style: none;
-          margin: 0;
-          padding: 0;
-        "
-      >
-        {site.footer.socials.map((social) => (
-          <li>
-            <a
-              href={social.href}
-              class="social-link"
-              style="padding: 12px 0; display: inline-block; color: inherit;"
-            >
-              {social.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    {socials.length > 0 && (
+      <nav aria-label="Sociala medier">
+        <ul
+          style="
+            display: flex;
+            gap: 32px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+          "
+        >
+          {socials.map((social) => (
+            <li>
+              <a
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="social-link"
+                style="padding: 12px 0; display: inline-block; color: inherit;"
+              >
+                {social.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
   </div>
 </footer>
 

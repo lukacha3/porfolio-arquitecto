@@ -1,5 +1,17 @@
 ---
 import { site } from "../data/site";
+
+interface Props {
+  about?: string | null;
+  services?: string[] | null;
+}
+
+const { about, services } = Astro.props;
+const statementText = about || site.studio.statement;
+const paragraphs = statementText.split(/\r?\n+/).filter(Boolean);
+
+// Take up to 3 services from Sanity or fallback
+const sanityServices = services && services.length > 0 ? services.slice(0, 3) : null;
 ---
 
 <section
@@ -28,19 +40,22 @@ import { site } from "../data/site";
 
   <!-- Main column -->
   <div style="flex: 3 1 480px; min-width: 0;">
-    <!-- Statement -->
-    <p
-      style="
-        font-size: var(--text-statement);
-        font-weight: 300;
-        line-height: 1.18;
-        letter-spacing: -0.025em;
-        max-width: 28ch;
-        margin: 0 0 80px;
-      "
-    >
-      {site.studio.statement}
-    </p>
+    <!-- Statement with paragraphs -->
+    <div style="max-width: 28ch; margin: 0 0 80px;">
+      {paragraphs.map((para) => (
+        <p
+          style="
+            font-size: var(--text-statement);
+            font-weight: 300;
+            line-height: 1.18;
+            letter-spacing: -0.025em;
+            margin: 0 0 24px;
+          "
+        >
+          {para}
+        </p>
+      ))}
+    </div>
 
     <!-- Services -->
     <ul
@@ -54,37 +69,61 @@ import { site } from "../data/site";
         padding: 0;
       "
     >
-      {site.studio.services.map((service) => (
-        <li
-          style="
-            flex: 1 1 200px;
-            border-top: 1px solid var(--color-line);
-            padding-top: 16px;
-          "
-        >
-          <p
+      {sanityServices ? (
+        sanityServices.map((serviceName, index) => (
+          <li
             style="
-              font-family: var(--font-mono);
-              font-size: 12px;
-              text-transform: uppercase;
-              letter-spacing: 0.08em;
-              margin: 0 0 12px;
+              flex: 1 1 200px;
+              border-top: 1px solid var(--color-line);
+              padding-top: 16px;
             "
           >
-            {service.number} {service.name}
-          </p>
-          <p
+            <p
+              style="
+                font-family: var(--font-mono);
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                margin: 0 0 12px;
+              "
+            >
+              {String(index + 1).padStart(2, "0")} {serviceName}
+            </p>
+          </li>
+        ))
+      ) : (
+        site.studio.services.map((service) => (
+          <li
             style="
-              font-size: 15px;
-              line-height: 1.5;
-              color: var(--color-muted);
-              margin: 0;
+              flex: 1 1 200px;
+              border-top: 1px solid var(--color-line);
+              padding-top: 16px;
             "
           >
-            {service.body}
-          </p>
-        </li>
-      ))}
+            <p
+              style="
+                font-family: var(--font-mono);
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                margin: 0 0 12px;
+              "
+            >
+              {service.number} {service.name}
+            </p>
+            <p
+              style="
+                font-size: 15px;
+                line-height: 1.5;
+                color: var(--color-muted);
+                margin: 0;
+              "
+            >
+              {service.body}
+            </p>
+          </li>
+        ))
+      )}
     </ul>
   </div>
 </section>
