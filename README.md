@@ -2,7 +2,7 @@
 
 Sitio web de portfolio en Astro — solo en sueco.
 
-## Fase 1 ✅
+## Fase 1
 
 Base del proyecto: Astro + Tailwind v4 + fuentes autoalojadas (Hanken Grotesk y DM Mono) + layout + tokens del template.
 
