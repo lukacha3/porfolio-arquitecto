@@ -45,6 +45,12 @@ export interface SanityProject {
   coverImage: SanityCoverImage;
 }
 
+export interface SanityProjectDetail extends SanityProject {
+  description?: string | null;
+  photographer?: string | null;
+  gallery?: SanityCoverImage[] | null;
+}
+
 export interface SanitySiteSettings {
   studioName?: string | null;
   headline?: string | null;
@@ -115,6 +121,43 @@ export const SITE_SETTINGS_QUERY = `*[_type == "siteSettings" && !(_id in path("
   }
 }`;
 
+export const PROJECT_SLUGS_QUERY = `*[_type == "project" && defined(slug.current) && !(_id in path("drafts.**"))].slug.current`;
+
+export const PROJECT_BY_SLUG_QUERY = `*[_type == "project" && slug.current == $slug && !(_id in path("drafts.**"))][0] {
+  _id,
+  title,
+  "slug": slug.current,
+  year,
+  "category": category->{
+    title,
+    "slug": slug.current
+  },
+  description,
+  photographer,
+  coverImage {
+    alt,
+    asset,
+    hotspot,
+    crop,
+    "dimensions": asset->metadata.dimensions {
+      width,
+      height,
+      aspectRatio
+    }
+  },
+  "gallery": gallery[] {
+    alt,
+    asset,
+    hotspot,
+    crop,
+    "dimensions": asset->metadata.dimensions {
+      width,
+      height,
+      aspectRatio
+    }
+  }
+}`;
+
 function checkEnv(): void {
   const projectId = import.meta.env.PUBLIC_SANITY_PROJECT_ID;
   const dataset = import.meta.env.PUBLIC_SANITY_DATASET;
@@ -160,4 +203,39 @@ export async function getSiteSettings(): Promise<SanitySiteSettings | null> {
       `[Sanity] Fel vid hämtning av webbplatsinställningar (SITE_SETTINGS_QUERY): ${error instanceof Error ? error.message : String(error)}`
     );
   }
+}
+
+export async function getProjectSlugs(): Promise<string[]> {
+  checkEnv();
+  try {
+    return await sanityClient.fetch<string[]>(PROJECT_SLUGS_QUERY);
+  } catch (error) {
+    throw new Error(
+      `[Sanity] Fel vid hämtning av projekt-slugs (PROJECT_SLUGS_QUERY): ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
+export async function getProjectBySlug(slug: string): Promise<SanityProjectDetail | null> {
+  checkEnv();
+  try {
+    return await sanityClient.fetch<SanityProjectDetail | null>(PROJECT_BY_SLUG_QUERY, { slug });
+  } catch (error) {
+    throw new Error(
+      `[Sanity] Fel vid hämtning av projekt "${slug}" (PROJECT_BY_SLUG_QUERY): ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
+export async function getAdjacentProjects(
+  slug: string
+): Promise<{ prev: SanityProject; next: SanityProject } | null> {
+  const projects = await getProjects();
+  if (projects.length === 0) return null;
+  const index = projects.findIndex((p) => p.slug === slug);
+  if (index === -1) return null;
+
+  const prev = projects[(index - 1 + projects.length) % projects.length];
+  const next = projects[(index + 1) % projects.length];
+  return { prev, next };
 }

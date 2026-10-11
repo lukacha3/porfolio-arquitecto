@@ -30,6 +30,15 @@ Conexión de la home con datos reales de Sanity:
 
 > **Nota sobre compilación estática:** El contenido se lee desde Sanity **al compilar** (`npm run build`). Por ende, los cambios publicados en el panel aparecerán en el sitio publicado cuando se vuelva a compilar el proyecto (la reconstrucción automática con webhooks se implementará en la fase 8).
 
+## Fase 5 
+
+Página de proyecto con galería horizontal:
+- Rutas dinámicas `/projekt/[slug]` generadas al compilar para cada proyecto publicado en Sanity.
+- Galería horizontal en `src/components/ProjectGallery.astro`: scroll-snap CSS, altura unificada, proporciones naturales (verticales y horizontales sin deformación), navegación por botones, teclado (flechas) y táctil/trackpad.
+- Fila de datos (kategori, år, fotograf), descripción estructurada y enlace a "Nästa projekt" con ciclo al primer proyecto.
+- Metadatos de SEO y Open Graph (`og:title`, `og:description`, `og:image`) específicos por proyecto.
+- Enlaces de las tarjetas de la home conectados a cada página de proyecto respetando el `base` de GitHub Pages.
+
 ### Acceso al Panel (Sanity Studio)
 
 - **Local:** `http://localhost:4321/porfolio-arquitecto/admin`

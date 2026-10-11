@@ -11,6 +11,7 @@ interface Props {
 }
 
 const { project, position, index, isFirst = false } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 // Wide: position % 4 === 0 or 3 ; Narrow: otherwise
 const isWide = position % 4 === 0 || position % 4 === 3;
@@ -30,8 +31,7 @@ const categorySlug = project.category?.slug || "";
     animation-delay: ${delay}ms;
   `}
 >
-  {/* TODO: change href to `/projekt/${project.slug}` in phase 5 */}
-  <a href="#" class="card-link" aria-label={project.title}>
+  <a href={`${base}/projekt/${project.slug}`} class="card-link" aria-label={project.title}>
     <!-- Image box -->
     <div
       class="card-image"

@@ -12,6 +12,8 @@ interface Props {
 
 const { headline, featuredProject, totalProjects = 0 } = Astro.props;
 const displayHeading = headline || site.hero.heading;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const heroHref = featuredProject?.slug ? `${base}/projekt/${featuredProject.slug}` : "#";
 const imageProps = featuredProject ? getImageProps(featuredProject.coverImage) : null;
 ---
 
@@ -53,11 +55,10 @@ const imageProps = featuredProject ? getImageProps(featuredProject.coverImage) :
   </div>
 
   <!-- Hero image -->
-  {/* TODO: change href to `/projekt/${featuredProject.slug}` in phase 5 */}
   <a
-    href="#"
+    href={heroHref}
     class="reveal"
-    style="display: block;"
+    style="display: block; text-decoration: none; color: inherit;"
     aria-label={featuredProject?.title || displayHeading}
   >
     <div

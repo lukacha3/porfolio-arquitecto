@@ -1,0 +1,283 @@
+---
+import type { SanityCoverImage } from "../lib/queries";
+import { getImageProps } from "../lib/images";
+import { site } from "../data/site";
+
+interface Props {
+  coverImage: SanityCoverImage;
+  gallery?: SanityCoverImage[] | null;
+  projectTitle: string;
+}
+
+const { coverImage, gallery = [], projectTitle } = Astro.props;
+
+// Combine cover image and gallery images
+const allImages: SanityCoverImage[] = [coverImage, ...(gallery || [])].filter(
+  (img) => Boolean(img?.asset)
+);
+
+const total = allImages.length;
+const isSingle = total <= 1;
+---
+
+<div
+  class="gallery-container"
+  role="region"
+  aria-label={`Bildgalleri för ${projectTitle}`}
+>
+  <!-- Track -->
+  <div
+    class="gallery-track"
+    tabindex="0"
+    role="region"
+    aria-label="Bläddra bland bilder med piltangenter eller scroll"
+  >
+    {allImages.map((img, idx) => {
+      const imgProps = getImageProps(img);
+      if (!imgProps) return null;
+      const isFirst = idx === 0;
+
+      return (
+        <figure class="gallery-item" data-index={idx}>
+          <img
+            src={imgProps.src}
+            srcset={imgProps.srcset}
+            sizes="(min-width: 1024px) 80vw, 95vw"
+            width={imgProps.width}
+            height={imgProps.height}
+            alt={imgProps.alt}
+            loading={isFirst ? "eager" : "lazy"}
+            decoding={isFirst ? "auto" : "async"}
+            fetchpriority={isFirst ? "high" : "auto"}
+            style={`
+              height: 100%;
+              width: auto;
+              max-width: none;
+              object-fit: contain;
+              object-position: ${imgProps.objectPosition};
+              display: block;
+            `}
+          />
+        </figure>
+      );
+    })}
+  </div>
+
+  <!-- Controls (only if more than 1 image) -->
+  {!isSingle && (
+    <div class="gallery-controls">
+      <span
+        class="gallery-counter"
+        aria-live="polite"
+        id="gallery-counter"
+      >
+        <span class="current-index">1</span> / {total}
+      </span>
+
+      <div class="gallery-nav-buttons">
+        <button
+          type="button"
+          class="gallery-btn prev-btn"
+          aria-label={site.projectPage.previous}
+          disabled
+        >
+          ←
+        </button>
+        <button
+          type="button"
+          class="gallery-btn next-btn"
+          aria-label={site.projectPage.next}
+        >
+          →
+        </button>
+      </div>
+    </div>
+  )}
+</div>
+
+<style>
+  .gallery-container {
+    width: 100%;
+    margin: 48px 0 64px;
+    position: relative;
+  }
+
+  .gallery-track {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0 var(--spacing-gutter);
+    cursor: grab;
+  }
+
+  .gallery-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gallery-track:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  .gallery-item {
+    margin: 0;
+    padding: 0;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    height: clamp(320px, 70vh, 720px);
+    background: var(--color-surface, #e5e5e5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .gallery-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px var(--spacing-gutter) 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+  }
+
+  .gallery-nav-buttons {
+    display: flex;
+    gap: 12px;
+  }
+
+  .gallery-btn {
+    background: transparent;
+    border: 1px solid var(--color-ink);
+    color: var(--color-ink);
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.2s, color 0.2s, opacity 0.2s;
+  }
+
+  .gallery-btn:hover:not(:disabled) {
+    background: var(--color-ink);
+    color: var(--color-ground);
+  }
+
+  .gallery-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-color: var(--color-line);
+    color: var(--color-muted);
+  }
+
+  .gallery-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-track {
+      scroll-behavior: auto;
+    }
+  }
+</style>
+
+<script>
+  function initGallery() {
+    const track = document.querySelector<HTMLElement>(".gallery-track");
+    if (!track) return;
+
+    const items = track.querySelectorAll<HTMLElement>(".gallery-item");
+    if (items.length <= 1) return;
+
+    const counterSpan = document.querySelector<HTMLElement>("#gallery-counter .current-index");
+    const prevBtn = document.querySelector<HTMLButtonElement>(".gallery-btn.prev-btn");
+    const nextBtn = document.querySelector<HTMLButtonElement>(".gallery-btn.next-btn");
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const scrollBehavior: ScrollBehavior = prefersReducedMotion ? "auto" : "smooth";
+
+    let currentIndex = 0;
+
+    function updateControls(index: number) {
+      currentIndex = index;
+      if (counterSpan) {
+        counterSpan.textContent = String(index + 1);
+      }
+      if (prevBtn) {
+        prevBtn.disabled = index === 0;
+      }
+      if (nextBtn) {
+        nextBtn.disabled = index >= items.length - 1;
+      }
+    }
+
+    // Scroll to item by index
+    function scrollToIndex(index: number) {
+      const target = items[index];
+      if (!target) return;
+      target.scrollIntoView({
+        behavior: scrollBehavior,
+        block: "nearest",
+        inline: "start",
+      });
+      updateControls(index);
+    }
+
+    prevBtn?.addEventListener("click", () => {
+      if (currentIndex > 0) {
+        scrollToIndex(currentIndex - 1);
+      }
+    });
+
+    nextBtn?.addEventListener("click", () => {
+      if (currentIndex < items.length - 1) {
+        scrollToIndex(currentIndex + 1);
+      }
+    });
+
+    // Keyboard navigation when track is focused
+    track.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        if (currentIndex > 0) scrollToIndex(currentIndex - 1);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        if (currentIndex < items.length - 1) scrollToIndex(currentIndex + 1);
+      }
+    });
+
+    // Track intersection to update active item index on manual scroll/swipe
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+            const idx = Number((entry.target as HTMLElement).dataset.index);
+            if (!isNaN(idx)) {
+              updateControls(idx);
+            }
+          }
+        });
+      },
+      {
+        root: track,
+        threshold: 0.5,
+      }
+    );
+
+    items.forEach((item) => observer.observe(item));
+  }
+
+  // Run on page load
+  initGallery();
+</script>

@@ -5,6 +5,7 @@ import { site } from "../data/site";
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
 }
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -12,6 +13,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const {
   title       = site.page.title,
   description = site.page.description,
+  image,
 } = Astro.props;
 ---
 
@@ -23,6 +25,18 @@ const {
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    {image && <meta property="og:image" content={image} />}
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content={image ? "summary_large_image" : "summary"} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {image && <meta name="twitter:image" content={image} />}
   </head>
   <body class="bg-ground text-ink font-sans min-h-screen">
     <slot />

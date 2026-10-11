@@ -1,0 +1,338 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import ProjectGallery from "../../components/ProjectGallery.astro";
+import PlaceholderArt from "../../components/PlaceholderArt.astro";
+import { site } from "../../data/site";
+import { getProjects, getProjectBySlug, getSiteSettings, type SanityProjectDetail, type SanityProject, type SanitySiteSettings } from "../../lib/queries";
+import { getImageProps } from "../../lib/images";
+import { urlFor } from "../../lib/sanity";
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  const siteSettings = await getSiteSettings();
+
+  return await Promise.all(
+    projects.map(async (p, index) => {
+      const fullProject = await getProjectBySlug(p.slug);
+      const nextProject = projects[(index + 1) % projects.length];
+      return {
+        params: { slug: p.slug },
+        props: {
+          project: fullProject || p,
+          nextProject,
+          siteSettings,
+        },
+      };
+    })
+  );
+}
+
+interface Props {
+  project: SanityProjectDetail;
+  nextProject: SanityProject;
+  siteSettings: SanitySiteSettings | null;
+}
+
+const { project, nextProject, siteSettings } = Astro.props;
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+// Studio name and page title
+const studioName = siteSettings?.studioName || site.studioName;
+const pageTitle = `${project.title} — ${studioName}`;
+
+// Truncate description for SEO meta without cutting words
+function truncateDescription(text?: string | null): string {
+  if (!text) return site.page.description;
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= 155) return clean;
+  const sub = clean.slice(0, 155);
+  const lastSpace = sub.lastIndexOf(" ");
+  return (lastSpace > 0 ? sub.slice(0, lastSpace) : sub) + "…";
+}
+
+const metaDescription = truncateDescription(project.description);
+
+// OG image URL
+const ogImageUrl = project.coverImage?.asset
+  ? urlFor(project.coverImage).width(1200).auto("format").quality(85).url()
+  : undefined;
+
+// Description paragraphs
+const descriptionParagraphs = project.description
+  ? project.description.split(/\r?\n+/).filter(Boolean)
+  : [];
+
+// Next project image helper
+const nextImage = nextProject ? getImageProps(nextProject.coverImage) : null;
+---
+
+<Layout title={pageTitle} description={metaDescription} image={ogImageUrl}>
+  <Header studioName={studioName} />
+
+  <main style="padding-top: 24px;">
+    <!-- Back link -->
+    <div style="padding: 0 var(--spacing-gutter); margin-bottom: 40px;">
+      <a
+        href={`${base}/#projekt`}
+        class="back-link"
+        style="
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-family: var(--font-mono);
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: var(--color-muted);
+          text-decoration: none;
+          padding: 8px 0;
+        "
+      >
+        ← {site.projectPage.back}
+      </a>
+    </div>
+
+    <!-- Project Header -->
+    <header style="padding: 0 var(--spacing-gutter); margin-bottom: 32px;">
+      <h1
+        style="
+          font-size: var(--text-display);
+          font-weight: 300;
+          line-height: 1.02;
+          letter-spacing: -0.035em;
+          max-width: 14ch;
+          margin: 0 0 32px;
+        "
+      >
+        {project.title}
+      </h1>
+
+      <!-- Meta row -->
+      <dl
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          gap: 32px;
+          margin: 0;
+          font-family: var(--font-mono);
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: var(--color-muted);
+        "
+      >
+        {project.category?.title && (
+          <div style="display: flex; gap: 8px;">
+            <dt style="color: var(--color-ink-soft);">{site.projectPage.category}:</dt>
+            <dd style="margin: 0; color: var(--color-ink);">{project.category.title}</dd>
+          </div>
+        )}
+        {project.year && (
+          <div style="display: flex; gap: 8px;">
+            <dt style="color: var(--color-ink-soft);">{site.projectPage.year}:</dt>
+            <dd style="margin: 0; color: var(--color-ink);">{project.year}</dd>
+          </div>
+        )}
+        {project.photographer && (
+          <div style="display: flex; gap: 8px;">
+            <dt style="color: var(--color-ink-soft);">{site.projectPage.photographer}:</dt>
+            <dd style="margin: 0; color: var(--color-ink);">{project.photographer}</dd>
+          </div>
+        )}
+      </dl>
+    </header>
+
+    <!-- Horizontal Gallery -->
+    <ProjectGallery
+      coverImage={project.coverImage}
+      gallery={project.gallery}
+      projectTitle={project.title}
+    />
+
+    <!-- Description -->
+    {descriptionParagraphs.length > 0 && (
+      <section
+        style="
+          padding: 80px var(--spacing-gutter);
+          display: flex;
+          flex-wrap: wrap;
+          gap: 48px;
+        "
+      >
+        <div style="flex: 1 1 200px;">
+          <span
+            style="
+              font-family: var(--font-mono);
+              font-size: 12px;
+              text-transform: uppercase;
+              letter-spacing: 0.08em;
+              color: var(--color-muted);
+            "
+          >
+            Beskrivning
+          </span>
+        </div>
+        <div style="flex: 3 1 480px; min-width: 0;">
+          {descriptionParagraphs.map((para) => (
+            <p
+              style="
+                font-size: var(--text-statement);
+                font-weight: 300;
+                line-height: 1.35;
+                letter-spacing: -0.02em;
+                max-width: 32ch;
+                margin: 0 0 28px;
+              "
+            >
+              {para}
+            </p>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Next Project -->
+    {nextProject && (
+      <section
+        style="
+          padding: 120px var(--spacing-gutter) 140px;
+          border-top: 1px solid var(--color-line);
+        "
+      >
+        <div
+          style="
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-muted);
+            margin-bottom: 24px;
+          "
+        >
+          {site.projectPage.nextProject}
+        </div>
+
+        <a
+          href={`${base}/projekt/${nextProject.slug}`}
+          class="next-project-link"
+          aria-label={`${site.projectPage.nextProject}: ${nextProject.title}`}
+          style="
+            display: block;
+            text-decoration: none;
+            color: inherit;
+          "
+        >
+          <div
+            class="next-project-image-box"
+            style="
+              width: 100%;
+              height: clamp(300px, 45vw, 560px);
+              overflow: hidden;
+              background: var(--color-surface, #e5e5e5);
+              margin-bottom: 24px;
+            "
+          >
+            {nextImage ? (
+              <img
+                src={nextImage.src}
+                srcset={nextImage.srcset}
+                sizes="100vw"
+                width={nextImage.width}
+                height={nextImage.height}
+                alt={nextImage.alt}
+                loading="lazy"
+                decoding="async"
+                style={`
+                  width: 100%;
+                  height: 100%;
+                  object-fit: cover;
+                  object-position: ${nextImage.objectPosition};
+                  display: block;
+                `}
+              />
+            ) : (
+              <PlaceholderArt variant="hero" id={nextProject.slug} />
+            )}
+          </div>
+
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: baseline;
+            "
+          >
+            <span
+              style="
+                font-size: var(--text-h2);
+                font-weight: 300;
+                letter-spacing: -0.03em;
+              "
+            >
+              {nextProject.title}
+            </span>
+            <span class="next-arrow" aria-hidden="true" style="font-size: 28px; opacity: 0.5;">
+              →
+            </span>
+          </div>
+        </a>
+      </section>
+    )}
+  </main>
+
+  <Footer
+    email={siteSettings?.email}
+    instagram={siteSettings?.instagram}
+    linkedin={siteSettings?.linkedin}
+    copyright={studioName ? `© ${studioName}` : undefined}
+  />
+</Layout>
+
+<style>
+  .back-link:hover {
+    color: var(--color-ink) !important;
+  }
+  .back-link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  .next-project-image-box img,
+  .next-project-image-box svg {
+    transition: transform 1.2s ease;
+  }
+
+  .next-project-link:hover .next-project-image-box img,
+  .next-project-link:hover .next-project-image-box svg {
+    transform: scale(1.04);
+  }
+
+  .next-project-link:hover .next-arrow {
+    transform: translateX(8px);
+    opacity: 1 !important;
+  }
+
+  .next-arrow {
+    display: inline-block;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .next-project-link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .next-project-image-box img,
+    .next-project-image-box svg,
+    .next-arrow {
+      transition: none;
+      transform: none !important;
+    }
+  }
+</style>

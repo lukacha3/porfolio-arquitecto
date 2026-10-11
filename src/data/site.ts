@@ -20,6 +20,18 @@ export const site = {
     emptyState: "Inga projekt ännu.",
   },
 
+  projectPage: {
+    back: "Tillbaka",
+    previous: "Föregående",
+    next: "Nästa",
+    nextProject: "Nästa projekt",
+    photographer: "Fotograf",
+    year: "År",
+    category: "Kategori",
+    galleryAria: "Bildgalleri",
+    counterAria: "Bild {n} av {total}",
+  },
+
   studio: {
     label: "Studion",
     statement:
