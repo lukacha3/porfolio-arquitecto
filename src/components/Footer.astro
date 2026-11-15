@@ -1,5 +1,6 @@
 ---
 import { site } from "../data/site";
+import Toast from "./Toast.astro";
 
 interface Props {
   email?: string | null;
@@ -12,9 +13,9 @@ const { email, instagram, linkedin, copyright } = Astro.props;
 const displayEmail = email || site.footer.email;
 const displayCopyright = copyright || site.footer.copyright;
 
+// LinkedIn is displayed as a dedicated button below the email; keep Instagram in the bottom row
 const socials = [
   instagram && { label: "Instagram", href: instagram },
-  linkedin && { label: "LinkedIn", href: linkedin },
 ].filter(Boolean) as { label: string; href: string }[];
 ---
 
@@ -40,22 +41,70 @@ const socials = [
     {site.footer.closing}
   </h2>
 
-  <!-- Email link -->
-  <a
-    href={`mailto:${displayEmail}`}
-    style="
-      display: inline-block;
-      margin-top: 48px;
-      padding: 8px 0;
-      font-size: clamp(1.25rem, 2.6vw, 2rem);
-      border-bottom: 1px solid var(--color-accent);
-      color: inherit;
-      text-decoration: none;
-    "
-    class="email-link"
-  >
-    {displayEmail}
-  </a>
+  <!-- Contact actions stack (Email + LinkedIn) -->
+  <div class="contact-actions">
+    <!-- Email link (click to copy with progressive enhancement) -->
+    <a
+      href={`mailto:${displayEmail}`}
+      class="email-link"
+      title={site.footer.copyEmailTooltip}
+      aria-label={`${site.footer.copyEmailAria} ${displayEmail}`}
+      data-copy-email={displayEmail}
+    >
+      <svg
+        class="email-link__envelope"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <rect x="2" y="4" width="20" height="16" rx="2" />
+        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+      </svg>
+      <span class="email-link__text">{displayEmail}</span>
+      <svg
+        class="email-link__copy-hint"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+      </svg>
+    </a>
+
+    <!-- LinkedIn button below email (only if configured in Sanity) -->
+    {linkedin && (
+      <div class="linkedin-row">
+        <a
+          href={linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="linkedin-link"
+          aria-label={site.footer.linkedinAria}
+        >
+          <svg
+            class="linkedin-link__icon"
+            role="img"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+          </svg>
+          <span class="linkedin-link__text">linkedin</span>
+        </a>
+      </div>
+    )}
+  </div>
 
   <!-- Bottom row -->
   <div
@@ -103,13 +152,113 @@ const socials = [
       </nav>
     )}
   </div>
+
+  <Toast defaultMessage={site.footer.emailCopiedToast} />
 </footer>
 
 <style>
-  .email-link:hover {
-    opacity: 0.75;
+  .contact-actions {
+    margin-top: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
   }
+
+  .email-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 0;
+    font-size: clamp(1.25rem, 2.6vw, 2rem);
+    border-bottom: 1px solid var(--color-accent);
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 200ms ease, border-color 200ms ease;
+  }
+
+  .email-link__envelope {
+    width: 0.9em;
+    height: 0.9em;
+    flex-shrink: 0;
+    color: var(--color-ink-soft);
+    transition: color 200ms ease;
+  }
+
+  .email-link__copy-hint {
+    width: 0.72em;
+    height: 0.72em;
+    flex-shrink: 0;
+    color: var(--color-ink-soft);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 200ms ease, transform 200ms ease, color 200ms ease;
+  }
+
+  @media (hover: hover) {
+    .email-link:hover .email-link__envelope,
+    .email-link:hover .email-link__copy-hint {
+      color: var(--color-ground);
+    }
+
+    .email-link:hover .email-link__copy-hint {
+      opacity: 0.85;
+      transform: translateX(0);
+    }
+  }
+
   .email-link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  .email-link:focus-visible .email-link__copy-hint {
+    opacity: 0.85;
+    transform: translateX(0);
+  }
+
+  .linkedin-row {
+    display: block;
+  }
+
+  .linkedin-link {
+    --linkedin-blue: #378FE9;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0 6px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    color: var(--color-ink-soft);
+    border-bottom: 1px solid var(--color-ink-soft);
+    text-decoration: none;
+    transition:
+      color 200ms ease,
+      border-color 200ms ease;
+  }
+
+  .linkedin-link__icon {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  @media (hover: hover) {
+    .linkedin-link:hover {
+      color: var(--linkedin-blue);
+      border-bottom-color: var(--linkedin-blue);
+    }
+  }
+
+  .linkedin-link:focus-visible {
+    color: var(--linkedin-blue);
+    border-bottom-color: var(--linkedin-blue);
     outline: 2px solid var(--color-accent);
     outline-offset: 4px;
     border-radius: 2px;
@@ -128,4 +277,72 @@ const socials = [
     outline-offset: 4px;
     border-radius: 2px;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .email-link,
+    .email-link__envelope,
+    .email-link__copy-hint,
+    .linkedin-link {
+      transition: none;
+    }
+  }
 </style>
+
+<script>
+  function fallbackCopyText(text: string): boolean {
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.top = "0";
+      textarea.style.left = "0";
+      textarea.style.opacity = "0";
+      textarea.style.pointerEvents = "none";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      textarea.setSelectionRange(0, text.length);
+      const ok = document.execCommand("copy");
+      document.body.removeChild(textarea);
+      return ok;
+    } catch {
+      return false;
+    }
+  }
+
+  async function copyToClipboard(text: string): Promise<boolean> {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        return fallbackCopyText(text);
+      }
+    }
+    return fallbackCopyText(text);
+  }
+
+  function initFooterEmailCopy() {
+    document.querySelectorAll<HTMLAnchorElement>("[data-copy-email]").forEach((link) => {
+      if (link.dataset.copyBound === "true") return;
+      link.dataset.copyBound = "true";
+
+      link.addEventListener("click", async (e: MouseEvent) => {
+        const email = link.dataset.copyEmail?.trim();
+        if (!email) return;
+
+        e.preventDefault();
+        const copied = await copyToClipboard(email);
+        if (copied) {
+          window.showToast?.();
+        } else {
+          window.location.href = link.href;
+        }
+      });
+    });
+  }
+
+  initFooterEmailCopy();
+  document.addEventListener("astro:page-load", initFooterEmailCopy);
+</script>

@@ -1,0 +1,157 @@
+---
+import { site } from "../data/site";
+
+interface Props {
+  defaultMessage?: string;
+}
+
+const { defaultMessage = site.footer.emailCopiedToast } = Astro.props;
+---
+
+<div
+  class="toast-region"
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+  data-toast-region
+  data-default-message={defaultMessage}
+>
+  <div class="toast-card" data-toast-card hidden>
+    <svg
+      class="toast-icon"
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M3 8.5L6.5 12L13 4.5" />
+    </svg>
+    <span class="toast-text" data-toast-text></span>
+  </div>
+</div>
+
+<style>
+  .toast-region {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    z-index: 9990;
+    pointer-events: none;
+    max-width: calc(100vw - 32px);
+  }
+
+  @media (min-width: 768px) {
+    .toast-region {
+      left: auto;
+      right: var(--spacing-gutter);
+      bottom: 32px;
+      transform: none;
+    }
+  }
+
+  .toast-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background-color: var(--color-ground);
+    color: var(--color-ink);
+    border: 1px solid var(--color-line);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.3;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 200ms ease,
+      transform 200ms ease;
+  }
+
+  .toast-card[hidden] {
+    display: none;
+  }
+
+  .toast-card.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .toast-icon {
+    flex-shrink: 0;
+    color: var(--color-accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast-card {
+      transition: none;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  declare global {
+    interface Window {
+      showToast?: (message?: string) => void;
+    }
+  }
+
+  function initToast() {
+    const region = document.querySelector<HTMLElement>("[data-toast-region]");
+    if (!region || region.dataset.toastInitialized === "true") return;
+    region.dataset.toastInitialized = "true";
+
+    const card = region.querySelector<HTMLElement>("[data-toast-card]");
+    const textEl = region.querySelector<HTMLElement>("[data-toast-text]");
+    if (!card || !textEl) return;
+
+    const defaultMsg = region.dataset.defaultMessage || "E-postadressen har kopierats";
+    let hideTimer: number | undefined;
+    let unmountTimer: number | undefined;
+
+    function triggerToast(message?: string) {
+      if (!card || !textEl) return;
+      const msg = message || defaultMsg;
+
+      window.clearTimeout(hideTimer);
+      window.clearTimeout(unmountTimer);
+
+      // Update text content so aria-live="polite" announces it
+      textEl.textContent = msg;
+      card.hidden = false;
+
+      // Force reflow so the 200ms fade/slide transition runs cleanly
+      void card.offsetWidth;
+      card.classList.add("is-visible");
+
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const transitionMs = reducedMotion ? 0 : 200;
+
+      hideTimer = window.setTimeout(() => {
+        card.classList.remove("is-visible");
+        unmountTimer = window.setTimeout(() => {
+          card.hidden = true;
+          textEl.textContent = "";
+        }, transitionMs);
+      }, 2500);
+    }
+
+    window.showToast = triggerToast;
+    document.addEventListener("app:toast", ((e: CustomEvent<{ message?: string }>) => {
+      triggerToast(e.detail?.message);
+    }) as EventListener);
+  }
+
+  initToast();
+  document.addEventListener("astro:page-load", initToast);
+</script>

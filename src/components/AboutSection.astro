@@ -120,19 +120,21 @@ const portraitAlt =
 
   .about-eyebrow {
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+    font-weight: 400;
+    line-height: 1.2;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     color: var(--color-muted);
-    margin-bottom: 14px;
+    margin-bottom: 16px;
   }
 
   .about-heading {
-    font-size: clamp(1.5rem, 2.4vw, 2.125rem);
+    font-size: var(--text-h2);
     font-weight: 300;
-    line-height: 1.15;
-    letter-spacing: -0.025em;
-    margin: 0 0 24px;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    margin: 0 0 28px;
   }
 
   .about-prose {

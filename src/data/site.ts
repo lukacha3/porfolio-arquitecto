@@ -51,9 +51,13 @@ export const site = {
   },
 
   footer: {
-    closing: "Hör av dig om ditt projekt.",
-    email: "hej@exempel.se",
+    closing: "Mina kontakter",
+    email: "pedrocforsberg99@gmail.com",
     copyright: "© Pedro Forsberg Arkitekt",
+    copyEmailTooltip: "Klicka för att kopiera",
+    copyEmailAria: "Kopiera e-postadressen",
+    emailCopiedToast: "E-postadressen har kopierats",
+    linkedinAria: "LinkedIn (öppnas i en ny flik)",
   },
 
   page: {

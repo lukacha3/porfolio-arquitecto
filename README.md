@@ -82,6 +82,9 @@ Pulido final de movimiento, accesibilidad (a11y), rendimiento y SEO:
   - Structured Data JSON-LD enriquecido: `ProfessionalService` en la portada y `VisualArtwork` en páginas de proyectos.
   - Etiquetas canónicas (`rel="canonical"`) dinámicas y etiquetas Open Graph / Twitter completas con imágenes reales de Sanity.
 - **Página 404 personalizada**: Página `404.astro` en sueco ("Sidan kunde inte hittas.") con navegación clara de retorno a la portada.
+- **Contacto en Footer (`src/components/Footer.astro`) y Toast reutilizable (`src/components/Toast.astro`)**:
+  - **Email con clic para copiar**: enlace `<a href="mailto:...">` con progressive enhancement (copia al portapapeles con `navigator.clipboard.writeText()` y fallback `execCommand('copy')` compatible con iOS Safari; si falla o no hay JS abre el cliente de correo). Incluye ícono de sobre, indicador visual de copiado en hover y muestra un toast accesible (`role="status"`, `aria-live="polite"`) con el texto *"E-postadressen har kopierats"*.
+  - **Botón de LinkedIn**: ubicado debajo del email con logo oficial SVG inline (`fill="currentColor"`), texto `linkedin` en minúsculas (`--font-mono`) y línea inferior fina, iluminándose al hacer hover/focus en `#378FE9` (azul LinkedIn accesible para modo oscuro con contraste **5.15:1** WCAG AA sobre `--color-ink`).
 - **Presupuesto de JavaScript**: El bundle total de scripts del cliente para páginas públicas pesa **~48.3 KB gzipped**, cumpliendo holgadamente el presupuesto límite de 60 KB gzipped.
 
 ### Acceso al Panel (Sanity Studio)
