@@ -17,7 +17,8 @@ const allImages: SanityCoverImage[] = [coverImage, ...(gallery || [])].filter(
 
 const slides: CarouselSlide[] = allImages.map((img) => ({
   image: img,
-  alt: img.alt || projectTitle,
+  caption: img.caption?.trim() || null,
+  alt: img.alt?.trim() || img.caption?.trim() || projectTitle,
 }));
 ---
 

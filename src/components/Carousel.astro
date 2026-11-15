@@ -27,6 +27,7 @@ const validSlides = slides.filter((s) => Boolean(s?.image?.asset));
 const total = validSlides.length;
 const isSingle = total <= 1;
 const isPlans = variant === "plans";
+const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim()));
 ---
 
 {total > 0 && (
@@ -55,7 +56,7 @@ const isPlans = variant === "plans";
         const isPortrait = imgProps.height > imgProps.width;
         const aspectRatio = (imgProps.width / imgProps.height).toFixed(4);
         const altText = slide.alt ?? imgProps.alt;
-        const captionText = isPlans ? slide.caption?.trim() : undefined;
+        const captionText = slide.caption?.trim();
         const objectPos = isPlans ? "50% 50%" : imgProps.objectPosition;
 
         return (
@@ -63,7 +64,7 @@ const isPlans = variant === "plans";
             class:list={[
               "gallery-item",
               {
-                "gallery-item--plan": isPlans,
+                "gallery-item--plan": hasAnyCaption,
                 "is-active": isFirst,
                 "is-portrait": isPortrait,
               },
@@ -98,7 +99,7 @@ const isPlans = variant === "plans";
                 `}
               />
             </div>
-            {isPlans && captionText && (
+            {captionText && (
               <figcaption class="gallery-caption">
                 {captionText}
               </figcaption>

@@ -40,6 +40,14 @@ export const project = defineType({
       },
       fields: [
         defineField({
+          name: 'caption',
+          title: 'Beskrivning',
+          description: 'Valfri kort text som visas under bilden.',
+          type: 'string',
+          validation: (Rule) =>
+            Rule.max(200).error('Beskrivningen får vara högst 200 tecken'),
+        }),
+        defineField({
           name: 'alt',
           title: 'Alternativ text (alt)',
           description: 'Beskriver bilden för personer med synnedsättning eller när bilden inte kan laddas.',
@@ -82,12 +90,34 @@ export const project = defineType({
           },
           fields: [
             defineField({
+              name: 'caption',
+              title: 'Beskrivning',
+              description: 'Valfri kort text som visas under bilden.',
+              type: 'string',
+              validation: (Rule) =>
+                Rule.max(200).error('Beskrivningen får vara högst 200 tecken'),
+            }),
+            defineField({
               name: 'alt',
               title: 'Alternativ text (alt)',
               description: 'Beskriver bilden för personer med synnedsättning.',
               type: 'string',
             }),
           ],
+          preview: {
+            select: {
+              title: 'caption',
+              subtitle: 'alt',
+              media: 'asset',
+            },
+            prepare({ title, subtitle, media }) {
+              return {
+                title: title || subtitle || 'Bild',
+                subtitle: title && subtitle ? subtitle : undefined,
+                media,
+              };
+            },
+          },
         }),
       ],
     }),

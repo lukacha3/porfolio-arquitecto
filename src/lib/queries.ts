@@ -7,6 +7,7 @@ export interface SanityDimensions {
 }
 
 export interface SanityCoverImage {
+  caption?: string | null;
   alt?: string | null;
   asset: {
     _ref: string;
@@ -147,6 +148,7 @@ export const PROJECT_BY_SLUG_QUERY = `*[_type == "project" && slug.current == $s
   description,
   photographer,
   coverImage {
+    caption,
     alt,
     asset,
     hotspot,
@@ -158,6 +160,7 @@ export const PROJECT_BY_SLUG_QUERY = `*[_type == "project" && slug.current == $s
     }
   },
   "gallery": gallery[] {
+    caption,
     alt,
     asset,
     hotspot,
