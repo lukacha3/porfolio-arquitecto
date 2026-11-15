@@ -1,0 +1,227 @@
+---
+import { site } from "../data/site";
+import type { SanityCoverImage, SanityPortableTextBlock } from "../lib/queries";
+import { getImageProps } from "../lib/images";
+import { renderAboutParagraphs } from "../lib/portableText";
+import { resolveTools } from "../data/tools";
+import ToolChip from "./ToolChip.astro";
+
+interface Props {
+  headline?: string | null;
+  aboutText?: SanityPortableTextBlock[] | string | null;
+  fallbackAbout?: string | null;
+  portrait?: SanityCoverImage | null;
+  tools?: string[] | null;
+  studioName?: string | null;
+}
+
+const {
+  headline,
+  aboutText,
+  fallbackAbout,
+  portrait,
+  tools,
+  studioName,
+} = Astro.props;
+
+const displayHeading = headline || site.hero.heading;
+const paragraphs = renderAboutParagraphs(
+  aboutText,
+  fallbackAbout || site.aboutMe.defaultText
+);
+const resolvedTools = resolveTools(tools);
+const portraitProps = getImageProps(portrait);
+const hasPortrait = Boolean(portraitProps);
+const portraitAlt =
+  portraitProps?.alt?.trim() || studioName || site.studioName;
+---
+
+<section
+  id="om-mig"
+  class:list={["about-section", { "about-section--with-portrait": hasPortrait }]}
+  aria-labelledby="about-heading"
+>
+  <div class="about-grid">
+    <!-- Left Column: Heading + Bio + Tools -->
+    <div class="about-left">
+      <div class="about-eyebrow">
+        <span>{site.aboutMe.label}</span>
+      </div>
+
+      <h1 id="about-heading" class="about-heading">
+        {displayHeading}
+      </h1>
+
+      {paragraphs.length > 0 && (
+        <div class="about-prose about-reveal">
+          {paragraphs.map((paraHtml) => (
+            <p set:html={paraHtml} />
+          ))}
+        </div>
+      )}
+
+      {resolvedTools.length > 0 && (
+        <div class="about-tools about-reveal">
+          <span class="about-tools__label">{site.aboutMe.toolsLabel}</span>
+          <ul class="about-tools__list" aria-label={site.aboutMe.toolsLabel}>
+            {resolvedTools.map((tool) => (
+              <ToolChip tool={tool} />
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+
+    <!-- Right Column: Portrait (only rendered when uploaded in Sanity) -->
+    {portraitProps && (
+      <div class="about-right about-reveal">
+        <figure class="about-portrait">
+          <img
+            src={portraitProps.src}
+            srcset={portraitProps.srcset}
+            sizes="(min-width: 960px) 38vw, 100vw"
+            width={portraitProps.width}
+            height={portraitProps.height}
+            alt={portraitAlt}
+            loading="eager"
+            fetchpriority="high"
+            style={`object-position: ${portraitProps.objectPosition};`}
+          />
+        </figure>
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .about-section {
+    padding: 56px var(--spacing-gutter) 24px;
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+
+  @media (min-width: 960px) {
+    .about-section--with-portrait .about-grid {
+      grid-template-columns: minmax(0, 1fr) clamp(280px, 28vw, 420px);
+      gap: clamp(32px, 4vw, 56px);
+      align-items: center;
+    }
+  }
+
+  .about-left {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .about-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+    margin-bottom: 14px;
+  }
+
+  .about-heading {
+    font-size: clamp(1.5rem, 2.4vw, 2.125rem);
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    margin: 0 0 24px;
+  }
+
+  .about-prose {
+    width: 100%;
+    margin-bottom: 40px;
+  }
+
+  .about-prose p {
+    font-size: calc(clamp(1.125rem, 1.6vw, 1.375rem) + 2pt);
+    font-weight: 300;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+    margin: 0 0 20px;
+  }
+
+  .about-prose p:last-child {
+    margin-bottom: 0;
+  }
+
+  .about-prose :global(strong) {
+    font-weight: 500;
+  }
+
+  .about-prose :global(em) {
+    font-style: italic;
+  }
+
+  .about-prose :global(a) {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    decoration-thickness: 1px;
+    transition: color 0.2s ease;
+  }
+
+  @media (hover: hover) {
+    .about-prose :global(a:hover) {
+      color: var(--color-accent);
+    }
+  }
+
+  .about-tools {
+    padding-top: 24px;
+    border-top: 1px solid var(--color-line);
+    width: 100%;
+  }
+
+  .about-tools__label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+    margin-bottom: 16px;
+  }
+
+  .about-tools__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .about-right {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  @media (min-width: 960px) {
+    .about-right {
+      max-width: none;
+    }
+  }
+
+  .about-portrait {
+    margin: 0;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: var(--color-line);
+  }
+
+  .about-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+</style>

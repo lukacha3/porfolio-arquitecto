@@ -28,7 +28,7 @@ function initLenis() {
 }
 
 function initAnimations() {
-  // Hero headline initial stagger reveal
+  // Hero / About headline initial stagger reveal
   const heroHeading = document.querySelector('h1');
   if (heroHeading && !heroHeading.closest('.project-gallery')) {
     gsap.fromTo(
@@ -38,6 +38,24 @@ function initAnimations() {
         opacity: 1,
         y: 0,
         duration: 0.9,
+        ease: 'power3.out',
+        clearProps: 'transform',
+      }
+    );
+  }
+
+  // About section elements initial stagger reveal
+  const aboutElements = document.querySelectorAll<HTMLElement>('.about-reveal');
+  if (aboutElements.length > 0) {
+    gsap.fromTo(
+      aboutElements,
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.85,
+        stagger: 0.1,
+        delay: 0.1,
         ease: 'power3.out',
         clearProps: 'transform',
       }
@@ -103,7 +121,7 @@ function destroy() {
   triggers.forEach((t) => t.kill());
   triggers = [];
   ScrollTrigger.getAll().forEach((t) => t.kill());
-  gsap.set('h1, .project-card, #studio, .next-project-section, .project-description, .plans-header', {
+  gsap.set('h1, .about-reveal, .project-card, #studio, .next-project-section, .project-description, .plans-header', {
     clearProps: 'all',
   });
 }

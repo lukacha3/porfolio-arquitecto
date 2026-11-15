@@ -64,9 +64,33 @@ export interface SanityProjectDetail extends SanityProject {
   plans?: SanityPlanImage[] | null;
 }
 
+export interface SanityPortableTextSpan {
+  _type: 'span';
+  _key?: string;
+  text: string;
+  marks?: string[];
+}
+
+export interface SanityPortableTextMarkDef {
+  _type: string;
+  _key: string;
+  href?: string;
+}
+
+export interface SanityPortableTextBlock {
+  _type: 'block';
+  _key?: string;
+  style?: string;
+  children?: SanityPortableTextSpan[];
+  markDefs?: SanityPortableTextMarkDef[];
+}
+
 export interface SanitySiteSettings {
   studioName?: string | null;
   headline?: string | null;
+  aboutText?: SanityPortableTextBlock[] | string | null;
+  portrait?: SanityCoverImage | null;
+  tools?: string[] | null;
   about?: string | null;
   services?: string[] | null;
   email?: string | null;
@@ -106,32 +130,24 @@ export const CATEGORIES_QUERY = `*[_type == "category" && defined(slug.current) 
 export const SITE_SETTINGS_QUERY = `*[_type == "siteSettings"][0] {
   studioName,
   headline,
+  aboutText,
+  portrait {
+    alt,
+    asset,
+    hotspot,
+    crop,
+    "dimensions": asset->metadata.dimensions {
+      width,
+      height,
+      aspectRatio
+    }
+  },
+  tools,
   about,
   services,
   email,
   instagram,
-  linkedin,
-  featuredProject-> {
-    _id,
-    title,
-    "slug": slug.current,
-    year,
-    "category": category->{
-      title,
-      "slug": slug.current
-    },
-    coverImage {
-      alt,
-      asset,
-      hotspot,
-      crop,
-      "dimensions": asset->metadata.dimensions {
-        width,
-        height,
-        aspectRatio
-      }
-    }
-  }
+  linkedin
 }`;
 
 export const PROJECT_SLUGS_QUERY = `*[_type == "project" && defined(slug.current)].slug.current`;

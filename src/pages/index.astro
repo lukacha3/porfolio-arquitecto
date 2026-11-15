@@ -1,12 +1,13 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
-import Hero from "../components/Hero.astro";
+import AboutSection from "../components/AboutSection.astro";
 import ProjectGrid from "../components/ProjectGrid.astro";
 import StudioSection from "../components/StudioSection.astro";
 import Footer from "../components/Footer.astro";
 import { site } from "../data/site";
 import { getProjects, getCategories, getSiteSettings } from "../lib/queries";
+import { portableTextToPlainText } from "../lib/portableText";
 import { urlFor } from "../lib/sanity";
 
 const [projects, categories, siteSettings] = await Promise.all([
@@ -15,12 +16,22 @@ const [projects, categories, siteSettings] = await Promise.all([
   getSiteSettings(),
 ]);
 
-const featuredProject = siteSettings?.featuredProject || projects[0] || null;
-
-// OG Image
-const ogImage = featuredProject?.coverImage?.asset
-  ? urlFor(featuredProject.coverImage).width(1200).auto("format").quality(85).url()
+// Portrait URL (used for OG image and JSON-LD)
+const portraitUrl = siteSettings?.portrait?.asset
+  ? urlFor(siteSettings.portrait).width(1200).auto("format").quality(85).url()
   : undefined;
+
+// Fallback OG Image to first project's cover image if no portrait is set
+const firstProjectCoverUrl = projects[0]?.coverImage?.asset
+  ? urlFor(projects[0].coverImage).width(1200).auto("format").quality(85).url()
+  : undefined;
+
+const ogImage = portraitUrl || firstProjectCoverUrl;
+
+const homeDescription = portableTextToPlainText(
+  siteSettings?.aboutText,
+  siteSettings?.about || site.page.description
+);
 
 // JSON-LD structured data for Home
 const siteOrigin = Astro.site ? new URL(Astro.site).origin : "https://lukacha3.github.io";
@@ -31,7 +42,8 @@ const organizationJsonLd = {
   "@type": "ProfessionalService",
   name: siteSettings?.studioName || site.studioName,
   url: siteOrigin,
-  description: siteSettings?.about || site.page.description,
+  description: homeDescription,
+  ...(portraitUrl ? { image: portraitUrl } : {}),
   ...(siteSettings?.email ? { email: siteSettings.email } : {}),
   ...(sameAs.length > 0 ? { sameAs } : {}),
 };
@@ -39,17 +51,20 @@ const organizationJsonLd = {
 
 <Layout
   title={siteSettings?.studioName ? `${siteSettings.studioName} — Arkitektur` : undefined}
-  description={siteSettings?.about || site.page.description}
+  description={homeDescription}
   image={ogImage}
   jsonLd={organizationJsonLd}
 >
   <Header studioName={siteSettings?.studioName} />
 
   <main id="main">
-    <Hero
+    <AboutSection
       headline={siteSettings?.headline}
-      featuredProject={featuredProject}
-      totalProjects={projects.length}
+      aboutText={siteSettings?.aboutText}
+      fallbackAbout={siteSettings?.about}
+      portrait={siteSettings?.portrait}
+      tools={siteSettings?.tools}
+      studioName={siteSettings?.studioName}
     />
     <ProjectGrid
       projects={projects}

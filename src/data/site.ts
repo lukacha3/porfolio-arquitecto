@@ -11,7 +11,14 @@ export const site = {
 
   hero: {
     heading: "Byggnader som växer ur platsen.",
-    dataLabelLeft: "Utvalda projekt",
+    dataLabelLeft: "Om mig",
+  },
+
+  aboutMe: {
+    label: "Om mig",
+    toolsLabel: "Verktyg",
+    defaultText:
+      "Arkitekt med fokus på platsanpassad gestaltning, genomtänkta materialval och hög detaljprecision — från tidiga skisser och 3D-visualisering till färdig bygghandling.",
   },
 
   projects: {
