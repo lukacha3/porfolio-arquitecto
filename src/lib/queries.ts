@@ -74,7 +74,7 @@ export interface SanitySiteSettings {
   featuredProject?: SanityProject | null;
 }
 
-export const PROJECTS_QUERY = `*[_type == "project" && defined(slug.current)] | order(defined(order) desc, order asc, year desc) {
+export const PROJECTS_QUERY = `*[_type == "project" && defined(slug.current)] | order(orderRank asc) {
   _id,
   title,
   "slug": slug.current,

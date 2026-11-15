@@ -1,4 +1,5 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
+import { orderRankField, orderRankOrdering } from '@sanity/orderable-document-list';
 import { slugify } from '../slugify';
 
 export const project = defineType({
@@ -7,12 +8,12 @@ export const project = defineType({
   type: 'document',
   orderings: [
     {
-      title: 'Ordning (stigande)',
-      name: 'orderAsc',
-      by: [{ field: 'order', direction: 'asc' }],
+      ...orderRankOrdering,
+      title: 'Manuell ordning',
     },
   ],
   fields: [
+    orderRankField({ type: 'project', newItemPosition: 'before' }),
     defineField({
       name: 'title',
       title: 'Titel',
@@ -151,12 +152,6 @@ export const project = defineType({
       name: 'photographer',
       title: 'Fotograf',
       type: 'string',
-    }),
-    defineField({
-      name: 'order',
-      title: 'Ordning',
-      description: 'Ett lägre nummer visas först i projektlistan.',
-      type: 'number',
     }),
   ],
   preview: {

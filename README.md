@@ -17,6 +17,7 @@ Integración con Sanity CMS:
 - Esquema de datos en sueco (`project`, `category`, `siteSettings` singleton).
 - Validaciones estrictas: `title` y `coverImage` obligatorios en proyectos.
 - Generación automática de slugs adaptada a caracteres suecos (å, ä, ö).
+- Ordenamiento manual de proyectos mediante **drag & drop** en Sanity Studio (`@sanity/orderable-document-list` con `orderRank` y proyectos nuevos ubicados al inicio `newItemPosition: 'before'`), reflejado en la portada, filtro por categorías y ciclo de "Nästa projekt".
 - Cliente Sanity y helper `urlFor` en `src/lib/sanity.ts`.
 
 ## Fase 4 
@@ -92,6 +93,9 @@ PUBLIC_SANITY_DATASET=production
 
 # Token de lectura para modo preview (opcional para desarrollo normal)
 SANITY_API_READ_TOKEN=tu_token_viewer_aqui
+
+# Token de escritura para scripts de mantenimiento/inicialización (ej. scripts/init-order-rank.ts)
+SANITY_API_WRITE_TOKEN=tu_token_editor_aqui
 ```
 
 ### Configuración del Token de Previsualización
@@ -99,6 +103,16 @@ SANITY_API_READ_TOKEN=tu_token_viewer_aqui
 1. En [sanity.io/manage](https://sanity.io/manage) → Seleccionar proyecto → pestaña **API** → **Tokens** → **Add API token**.
 2. Nombre: `Preview (read)`, permiso: **Viewer**.
 3. Copiar el token generado y guardarlo en `.env` como `SANITY_API_READ_TOKEN=...` (**sin prefijo PUBLIC_**).
+
+### Inicialización y Ordenamiento de Proyectos (Drag & Drop)
+
+Los proyectos se ordenan en Sanity Studio arrastrándolos directamente en la lista **Projekt**. Para inicializar el campo `orderRank` en proyectos existentes respetando el orden previo:
+
+1. **Mediante script (`scripts/init-order-rank.ts`)**:
+   - Simulacro sin escribir en Sanity: `npm run init:order:dry`
+   - Ejecución real (requiere `SANITY_API_WRITE_TOKEN` con permiso **Editor** en `.env`): `npm run init:order`
+2. **Desde Sanity Studio (`/admin`)**:
+   - Abrir `/admin` → **Projekt** → menú de tres puntos (`⋯`) en la esquina superior derecha de la lista → **Reset Order**.
 
 ### Configuración de CORS en Sanity
 
@@ -110,10 +124,12 @@ En [sanity.io/manage](https://sanity.io/manage) → Seleccionar tu proyecto → 
 ## Comandos
 
 ```bash
-npm install          # Instalar dependencias
-npm run dev          # Iniciar servidor de desarrollo en modo normal (http://localhost:4321/porfolio-arquitecto/)
-npm run dev:preview  # Iniciar servidor de desarrollo en modo preview con borradores
-npm run build        # Compilar para producción (solo publicados)
+npm install           # Instalar dependencias
+npm run dev           # Iniciar servidor de desarrollo en modo normal (http://localhost:4321/porfolio-arquitecto/)
+npm run dev:preview   # Iniciar servidor de desarrollo en modo preview con borradores
+npm run build         # Compilar para producción (solo publicados)
 npm run build:preview # Compilar en modo preview (con borradores)
-npm run preview      # Previsualizar la compilación de producción
+npm run preview       # Previsualizar la compilación de producción
+npm run init:order:dry # Previsualizar inicialización de orderRank sin modificar Sanity
+npm run init:order    # Inicializar orderRank en proyectos existentes en Sanity
 ```

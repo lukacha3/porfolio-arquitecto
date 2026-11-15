@@ -11,7 +11,9 @@
     "build": "astro build",
     "build:preview": "astro build --mode preview",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "init:order": "node scripts/init-order-rank.ts",
+    "init:order:dry": "node scripts/init-order-rank.ts --dry-run"
   },
   "dependencies": {
     "@astrojs/react": "^7.0.1",
@@ -20,6 +22,7 @@
     "@fontsource/hanken-grotesk": "^5.3.0",
     "@sanity/astro": "^3.5.1",
     "@sanity/image-url": "^2.1.1",
+    "@sanity/orderable-document-list": "^2.0.29",
     "@sanity/vision": "^6.18.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.3.0",

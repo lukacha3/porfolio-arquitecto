@@ -1,6 +1,7 @@
 import { defineConfig } from 'sanity';
 import { structureTool } from 'sanity/structure';
 import { visionTool } from '@sanity/vision';
+import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list';
 import { schemaTypes } from './src/sanity/schemaTypes';
 
 const projectId =
@@ -24,7 +25,7 @@ export default defineConfig({
   dataset,
   plugins: [
     structureTool({
-      structure: (S) =>
+      structure: (S, context) =>
         S.list()
           .title('Innehåll')
           .items([
@@ -39,8 +40,14 @@ export default defineConfig({
                   .title('Webbplatsinställningar')
               ),
             S.divider(),
+            // Orderable projects list (drag & drop)
+            orderableDocumentListDeskItem({
+              type: 'project',
+              title: 'Projekt',
+              S,
+              context,
+            }),
             // Regular document types
-            S.documentTypeListItem('project').title('Projekt'),
             S.documentTypeListItem('category').title('Kategorier'),
           ]),
     }),
