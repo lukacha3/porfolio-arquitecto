@@ -36,7 +36,7 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
     role="region"
     aria-label={ariaLabel}
     data-carousel
-    data-lenis-prevent
+    data-lenis-prevent-horizontal
   >
     <!-- Track -->
     <div
@@ -45,7 +45,7 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
       role="region"
       aria-label="Bläddra med piltangenter eller scroll"
       data-carousel-track
-      data-lenis-prevent
+      data-lenis-prevent-horizontal
     >
       {validSlides.map((slide, idx) => {
         const imgProps = getImageProps(slide.image);
@@ -66,6 +66,7 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
               {
                 "gallery-item--plan": hasAnyCaption,
                 "is-active": isFirst,
+                "is-next": idx === 1,
                 "is-portrait": isPortrait,
               },
             ]}
@@ -88,6 +89,7 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
                 loading={shouldEager ? "eager" : "lazy"}
                 decoding={shouldEager ? "auto" : "async"}
                 fetchpriority={shouldEager ? "high" : "auto"}
+                draggable="false"
                 style={`
                   height: 100%;
                   width: 100%;
@@ -150,8 +152,12 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
     --slide-img-height: clamp(320px, 70vh, 720px);
     --gallery-gap: 5vw;
     --slide-opacity: 0.55;
+    --slide-opacity-hover: 0.78;
     --slide-scale: 0.96;
+    --slide-scale-hover: 0.975;
     --slide-transition-duration: 400ms;
+    --cursor-prev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Ccircle cx='18' cy='18' r='16.5' fill='%23eceae5' fill-opacity='0.92' stroke='%231b1b19' stroke-width='1'/%3E%3Cpath d='M23 18H13M13 18L17.5 13.5M13 18L17.5 22.5' stroke='%231b1b19' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 18 18, w-resize;
+    --cursor-next: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Ccircle cx='18' cy='18' r='16.5' fill='%23eceae5' fill-opacity='0.92' stroke='%231b1b19' stroke-width='1'/%3E%3Cpath d='M13 18H23M23 18L18.5 13.5M23 18L18.5 22.5' stroke='%231b1b19' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") 18 18, e-resize;
 
     width: 100%;
     margin: 48px 0 64px;
@@ -177,13 +183,14 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
     display: flex;
     gap: var(--gallery-gap);
     overflow-x: auto;
+    overflow-y: hidden;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
     scrollbar-width: none;
     -ms-overflow-style: none;
     padding-inline: calc((100% - var(--slide-width)) / 2);
     padding-block: 0;
-    cursor: grab;
+    cursor: default;
   }
 
   .gallery-track.is-single {
@@ -224,7 +231,7 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
     -webkit-user-select: none;
   }
 
-  /* Plans slide: image row + reserved caption row so height never jumps */
+  /* Slide with caption support: image row + reserved caption row so height never jumps */
   .gallery-item--plan {
     height: auto;
     display: grid;
@@ -251,16 +258,14 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
     color: var(--color-ink-soft);
     text-align: center;
     max-width: 65ch;
+    user-select: text;
+    -webkit-user-select: text;
     transition:
       opacity var(--slide-transition-duration) ease,
       transform var(--slide-transition-duration) ease;
   }
 
   /* Progressive enhancement: opacity and subtle scale on inactive items */
-  .gallery-container.gallery--enhanced .gallery-item {
-    cursor: pointer;
-  }
-
   .gallery-container.gallery--enhanced .gallery-item img {
     opacity: var(--slide-opacity);
     transform: scale(var(--slide-scale));
@@ -276,10 +281,6 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
     pointer-events: none;
   }
 
-  .gallery-container.gallery--enhanced .gallery-item.is-active {
-    cursor: default;
-  }
-
   .gallery-container.gallery--enhanced .gallery-item.is-active img {
     opacity: 1;
     transform: scale(1);
@@ -288,6 +289,32 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
   .gallery-container.gallery--enhanced .gallery-item.is-active .gallery-caption {
     opacity: 1;
     transform: translateY(0);
+  }
+
+  /* Directional cursors and subtle neighbor highlight on devices with hover */
+  @media (hover: hover) {
+    .gallery-container.gallery--enhanced .gallery-track[data-hover-side="prev"] {
+      cursor: var(--cursor-prev);
+    }
+
+    .gallery-container.gallery--enhanced .gallery-track[data-hover-side="next"] {
+      cursor: var(--cursor-next);
+    }
+
+    .gallery-container.gallery--enhanced .gallery-track[data-hover-side="center"],
+    .gallery-container.gallery--enhanced .gallery-track[data-hover-side="none"] {
+      cursor: default;
+    }
+
+    .gallery-container.gallery--enhanced .gallery-track[data-hover-side="dragging"] {
+      cursor: grabbing;
+    }
+
+    .gallery-container.gallery--enhanced .gallery-track[data-hover-side="prev"] .gallery-item.is-prev img,
+    .gallery-container.gallery--enhanced .gallery-track[data-hover-side="next"] .gallery-item.is-next img {
+      opacity: var(--slide-opacity-hover);
+      transform: scale(var(--slide-scale-hover));
+    }
   }
 
   .gallery-controls {
@@ -374,6 +401,7 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
     const scrollBehavior: ScrollBehavior = prefersReducedMotion ? "auto" : "smooth";
 
     let currentIndex = 0;
+    let lastHoverClientX: number | null = null;
 
     // Dynamic padding so both the first and last slides (whether horizontal or vertical) can center
     function updateTrackPadding() {
@@ -386,6 +414,22 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
       track.style.paddingInlineEnd = `${padEnd}px`;
     }
 
+    // Determine hover side relative to the active slide's bounding box
+    function updateHoverZone(clientX: number | null) {
+      if (!track || clientX === null) return;
+      const activeItem = items[currentIndex];
+      if (!activeItem) return;
+
+      const activeRect = activeItem.getBoundingClientRect();
+      if (clientX < activeRect.left) {
+        track.dataset.hoverSide = currentIndex > 0 ? "prev" : "none";
+      } else if (clientX > activeRect.right) {
+        track.dataset.hoverSide = currentIndex < items.length - 1 ? "next" : "none";
+      } else {
+        track.dataset.hoverSide = "center";
+      }
+    }
+
     function updateActiveState(index: number) {
       if (index < 0 || index >= items.length) return;
       currentIndex = index;
@@ -393,6 +437,8 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
       items.forEach((item, idx) => {
         const isActive = idx === index;
         item.classList.toggle("is-active", isActive);
+        item.classList.toggle("is-prev", idx === index - 1);
+        item.classList.toggle("is-next", idx === index + 1);
         if (isActive) {
           item.setAttribute("aria-current", "true");
         } else {
@@ -476,48 +522,117 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
       }
     });
 
-    // Avoid triggering click during swipe gestures
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let isSwiping = false;
-
-    track.addEventListener(
-      "touchstart",
-      (e: TouchEvent) => {
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-        isSwiping = false;
-      },
-      { passive: true }
-    );
-
-    track.addEventListener(
-      "touchmove",
-      (e: TouchEvent) => {
-        const dx = Math.abs(e.touches[0].clientX - touchStartX);
-        const dy = Math.abs(e.touches[0].clientY - touchStartY);
-        if (dx > 10 || dy > 10) {
-          isSwiping = true;
-        }
-      },
-      { passive: true }
-    );
-
-    // Slide interaction: click or enter/space on neighbor centers it
+    // Keyboard activation when a specific slide has focus
     items.forEach((item, idx) => {
-      item.addEventListener("click", () => {
-        if (isSwiping) return;
-        if (idx !== currentIndex) {
-          scrollToIndex(idx);
-        }
-      });
-
       item.addEventListener("keydown", (e: KeyboardEvent) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          scrollToIndex(idx);
+          if (idx !== currentIndex) {
+            scrollToIndex(idx);
+          }
         }
       });
+    });
+
+    // Distinguish clean click/tap from drag/swipe (> 6px pointer movement or track scroll)
+    const DRAG_THRESHOLD_PX = 6;
+    let pointerDownX = 0;
+    let pointerDownY = 0;
+    let pointerDownScrollLeft = 0;
+    let isPointerDown = false;
+    let didDragOrScroll = false;
+
+    track.addEventListener(
+      "pointerdown",
+      (e: PointerEvent) => {
+        if (e.button !== 0) return;
+        isPointerDown = true;
+        didDragOrScroll = false;
+        pointerDownX = e.clientX;
+        pointerDownY = e.clientY;
+        pointerDownScrollLeft = track.scrollLeft;
+      },
+      { passive: true }
+    );
+
+    track.addEventListener(
+      "pointermove",
+      (e: PointerEvent) => {
+        lastHoverClientX = e.clientX;
+        if (isPointerDown) {
+          const dx = Math.abs(e.clientX - pointerDownX);
+          const dy = Math.abs(e.clientY - pointerDownY);
+          const dScroll = Math.abs(track.scrollLeft - pointerDownScrollLeft);
+          if (dx > DRAG_THRESHOLD_PX || dy > DRAG_THRESHOLD_PX || dScroll > 2) {
+            didDragOrScroll = true;
+            track.dataset.hoverSide = "dragging";
+          }
+        } else {
+          updateHoverZone(e.clientX);
+        }
+      },
+      { passive: true }
+    );
+
+    track.addEventListener(
+      "pointerup",
+      (e: PointerEvent) => {
+        isPointerDown = false;
+        if (e.pointerType === "mouse") {
+          lastHoverClientX = e.clientX;
+          updateHoverZone(e.clientX);
+        } else {
+          delete track.dataset.hoverSide;
+        }
+      },
+      { passive: true }
+    );
+
+    track.addEventListener(
+      "pointercancel",
+      () => {
+        isPointerDown = false;
+        didDragOrScroll = true;
+        delete track.dataset.hoverSide;
+      },
+      { passive: true }
+    );
+
+    track.addEventListener(
+      "pointerleave",
+      () => {
+        lastHoverClientX = null;
+        if (!isPointerDown) {
+          delete track.dataset.hoverSide;
+        }
+      },
+      { passive: true }
+    );
+
+    // Unified click navigation: compare click X against active slide edges
+    track.addEventListener("click", (e: MouseEvent) => {
+      if (didDragOrScroll) {
+        didDragOrScroll = false;
+        return;
+      }
+
+      const activeItem = items[currentIndex];
+      if (!activeItem) return;
+
+      const activeRect = activeItem.getBoundingClientRect();
+      const clickX = e.clientX;
+
+      if (clickX < activeRect.left) {
+        if (currentIndex > 0) {
+          scrollToIndex(currentIndex - 1);
+        }
+      } else if (clickX > activeRect.right) {
+        if (currentIndex < items.length - 1) {
+          scrollToIndex(currentIndex + 1);
+        }
+      } else {
+        // Click on the active (center) slide: no-op for now, ready for a future lightbox/zoom view
+      }
     });
 
     // Track scroll events to update active state during manual swipe / scroll-snap
@@ -525,11 +640,17 @@ const hasAnyCaption = isPlans || validSlides.some((s) => Boolean(s.caption?.trim
     track.addEventListener(
       "scroll",
       () => {
+        if (isPointerDown && Math.abs(track.scrollLeft - pointerDownScrollLeft) > 2) {
+          didDragOrScroll = true;
+        }
         cancelAnimationFrame(scrollRaf);
         scrollRaf = requestAnimationFrame(() => {
           const activeIdx = getActiveIndex();
           if (activeIdx !== currentIndex) {
             updateActiveState(activeIdx);
+          }
+          if (!isPointerDown && lastHoverClientX !== null) {
+            updateHoverZone(lastHoverClientX);
           }
         });
       },

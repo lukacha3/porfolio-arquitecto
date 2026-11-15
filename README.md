@@ -42,7 +42,7 @@ Página de proyecto con galería horizontal:
   - Foco y nitidez total: sin difuminado/blur, manteniendo todas las imágenes 100% nítidas. La diapositiva activa resalta mediante opacidad completa (1.0) y escala natural, mientras las inactivas se atenúan suavemente (`opacity: 0.55`, `scale: 0.96`) con transiciones suaves (400ms).
   - Descripciones opcionales por imagen (`caption` / `Beskrivning`): tanto `coverImage` como cada foto de `gallery` y cada ítem de `plans` admiten una descripción opcional de hasta 200 caracteres debajo de la imagen (`<figcaption>`). En la galería de fotos, si ninguna foto tiene descripción no se reserva espacio extra debajo; si al menos una tiene, se reserva una fila inferior uniforme para evitar saltos de altura al cambiar de foto.
   - Centrado dinámico inteligente: cálculo de padding start/end automático en el track para garantizar que la primera y última diapositiva queden siempre perfectamente centradas sin importar si son horizontales o verticales.
-  - Interactividad completa: navegación por botones prev/next, clic directo en cualquier vecina para centrarla, swipe/trackpad fluido y navegación por teclado (flechas, Home, End, Enter/Espacio) aislada al carrusel con foco.
+  - Interactividad completa: navegación por botones prev/next, clic/tap en cualquier punto a la izquierda o derecha de la imagen activa (sobre la vecina o en el espacio vacío lateral) con cursores direccionales SVG personalizados y realce sutil al pasar el mouse (`@media (hover: hover)`), swipe/trackpad fluido (distinguiendo clic de arrastre a partir de 6 px) y navegación por teclado (flechas, Home, End, Enter/Espacio) aislada al carrusel con foco.
   - Progressive enhancement y accesibilidad: sin JS todas las imágenes y descripciones permanecen visibles y navegables mediante scroll horizontal nativo; respeta estrictamente `prefers-reduced-motion: reduce`. Si hay una sola imagen, se muestra centrada sin controles.
 - Sección opcional de planos (`Planritningar`) en `src/components/ProjectPlans.astro`:
   - Configurable por proyecto desde Sanity (`hasPlans` / `Visa planritningar` y lista `plans` con descripción `caption` de hasta 200 caracteres y `alt`).
@@ -64,7 +64,7 @@ Borradores y modo de previsualización:
 
 Pulido final de movimiento, accesibilidad (a11y), rendimiento y SEO:
 - **Movimiento arquitectónico refinado**: Integración de Lenis para scroll suave y GSAP ScrollTrigger para transiciones y microinteracciones sutiles (fade-ins discretos en tarjetas y encabezados, transiciones tipográficas).
-- **Aislamiento de Lenis**: Galería horizontal protegida con `data-lenis-prevent` para evitar interferencias con el desplazamiento táctil y trackpad.
+- **Aislamiento de Lenis**: Galería horizontal protegida con `data-lenis-prevent-horizontal` para permitir scroll vertical libre en toda la página mientras mantiene el desplazamiento horizontal nativo con trackpad y pantallas táctiles.
 - **Exclusión en Admin**: GSAP y Lenis no se cargan en el panel de Sanity Studio (`/admin`), manteniendo su rendimiento intacto.
 - **Accesibilidad y `prefers-reduced-motion`**:
   - Respeto total a las preferencias del usuario: con `prefers-reduced-motion: reduce`, Lenis y ScrollTrigger se desactivan instantáneamente y los estilos CSS eliminan transiciones y transformaciones.
