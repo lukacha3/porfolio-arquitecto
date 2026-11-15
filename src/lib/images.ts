@@ -1,5 +1,5 @@
 import { urlFor } from './sanity';
-import type { SanityCoverImage } from './queries';
+import type { SanityCoverImage, SanityPlanImage } from './queries';
 
 export interface ImageProps {
   src: string;
@@ -10,7 +10,7 @@ export interface ImageProps {
   alt: string;
 }
 
-export function getImageProps(coverImage?: SanityCoverImage | null): ImageProps | null {
+export function getImageProps(coverImage?: SanityCoverImage | SanityPlanImage | null): ImageProps | null {
   if (!coverImage || !coverImage.asset) {
     return null;
   }
@@ -25,7 +25,7 @@ export function getImageProps(coverImage?: SanityCoverImage | null): ImageProps 
 
   const src = urlFor(coverImage).width(1200).auto('format').quality(85).url();
 
-  const hotspot = coverImage.hotspot;
+  const hotspot = 'hotspot' in coverImage ? coverImage.hotspot : null;
   const objectPosition = hotspot
     ? `${Math.round(hotspot.x * 100)}% ${Math.round(hotspot.y * 100)}%`
     : '50% 50%';

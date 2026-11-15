@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import ProjectGallery from "../../components/ProjectGallery.astro";
+import ProjectPlans from "../../components/ProjectPlans.astro";
 import PlaceholderArt from "../../components/PlaceholderArt.astro";
 import { site } from "../../data/site";
 import { getProjects, getProjectBySlug, getSiteSettings, type SanityProjectDetail, type SanityProject, type SanitySiteSettings } from "../../lib/queries";
@@ -164,6 +165,13 @@ const projectJsonLd = {
     <ProjectGallery
       coverImage={project.coverImage}
       gallery={project.gallery}
+      projectTitle={project.title}
+    />
+
+    <!-- Floor Plans (optional) -->
+    <ProjectPlans
+      plans={project.plans}
+      hasPlans={project.hasPlans}
       projectTitle={project.title}
     />
 

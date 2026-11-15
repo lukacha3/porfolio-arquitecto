@@ -45,10 +45,22 @@ export interface SanityProject {
   coverImage: SanityCoverImage;
 }
 
+export interface SanityPlanImage {
+  caption?: string | null;
+  alt?: string | null;
+  asset: {
+    _ref: string;
+    _type?: string;
+  };
+  dimensions?: SanityDimensions | null;
+}
+
 export interface SanityProjectDetail extends SanityProject {
   description?: string | null;
   photographer?: string | null;
   gallery?: SanityCoverImage[] | null;
+  hasPlans?: boolean | null;
+  plans?: SanityPlanImage[] | null;
 }
 
 export interface SanitySiteSettings {
@@ -150,6 +162,17 @@ export const PROJECT_BY_SLUG_QUERY = `*[_type == "project" && slug.current == $s
     asset,
     hotspot,
     crop,
+    "dimensions": asset->metadata.dimensions {
+      width,
+      height,
+      aspectRatio
+    }
+  },
+  hasPlans,
+  "plans": plans[] {
+    caption,
+    alt,
+    asset,
     "dimensions": asset->metadata.dimensions {
       width,
       height,

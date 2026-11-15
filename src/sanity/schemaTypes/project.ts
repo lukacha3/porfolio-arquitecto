@@ -91,6 +91,63 @@ export const project = defineType({
       ],
     }),
     defineField({
+      name: 'hasPlans',
+      title: 'Visa planritningar',
+      description: 'Aktivera för att lägga till planritningar i projektet.',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'plans',
+      title: 'Planritningar',
+      type: 'array',
+      hidden: ({ parent }) => !parent?.hasPlans,
+      validation: (Rule) =>
+        Rule.custom((value, context) => {
+          const parent = context.parent as { hasPlans?: boolean } | undefined;
+          if (parent?.hasPlans && (!value || !Array.isArray(value) || value.length === 0)) {
+            return 'Lägg till minst en planritning när "Visa planritningar" är aktiverat';
+          }
+          return true;
+        }),
+      of: [
+        defineArrayMember({
+          type: 'image',
+          title: 'Planritning',
+          fields: [
+            defineField({
+              name: 'caption',
+              title: 'Beskrivning',
+              description: 'Kort text som visas under planritningen.',
+              type: 'string',
+              validation: (Rule) =>
+                Rule.max(200).error('Beskrivningen får vara högst 200 tecken'),
+            }),
+            defineField({
+              name: 'alt',
+              title: 'Alternativ text (alt)',
+              description: 'Beskriver bilden för personer med synnedsättning.',
+              type: 'string',
+            }),
+          ],
+          preview: {
+            select: {
+              title: 'caption',
+              subtitle: 'alt',
+              media: 'asset',
+            },
+            prepare({ title, subtitle, media }) {
+              return {
+                title: title || subtitle || 'Planritning',
+                subtitle: title && subtitle ? subtitle : undefined,
+                media,
+              };
+            },
+          },
+        }),
+      ],
+    }),
+    defineField({
       name: 'photographer',
       title: 'Fotograf',
       type: 'string',

@@ -1,0 +1,65 @@
+---
+import type { SanityPlanImage } from "../lib/queries";
+import Carousel, { type CarouselSlide } from "./Carousel.astro";
+
+interface Props {
+  hasPlans?: boolean | null;
+  plans?: SanityPlanImage[] | null;
+  projectTitle: string;
+}
+
+const { hasPlans = false, plans = [], projectTitle } = Astro.props;
+
+const validPlans = (plans || []).filter((plan) => Boolean(plan?.asset));
+const shouldRender = hasPlans === true && validPlans.length > 0;
+
+const slides: CarouselSlide[] = validPlans.map((plan, idx) => ({
+  image: plan,
+  caption: plan.caption?.trim() || null,
+  alt:
+    plan.alt?.trim() ||
+    plan.caption?.trim() ||
+    `Planritning ${idx + 1} – ${projectTitle}`,
+}));
+---
+
+{shouldRender && (
+  <section
+    class="project-plans-section"
+    aria-labelledby="plans-heading"
+  >
+    <div class="plans-header">
+      <h2 id="plans-heading" class="plans-label">
+        Planritningar
+      </h2>
+    </div>
+
+    <Carousel
+      slides={slides}
+      ariaLabel={`Planritningar för ${projectTitle}`}
+      variant="plans"
+      eagerFirst={false}
+    />
+  </section>
+)}
+
+<style>
+  .project-plans-section {
+    padding: 40px 0 64px;
+  }
+
+  .plans-header {
+    padding: 0 var(--spacing-gutter);
+    margin-bottom: 24px;
+  }
+
+  .plans-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+    margin: 0;
+  }
+</style>

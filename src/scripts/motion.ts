@@ -68,8 +68,10 @@ function initAnimations() {
     triggers.push(trigger);
   });
 
-  // Section titles and studio blocks
-  const sections = document.querySelectorAll<HTMLElement>('#studio, .next-project-section');
+  // Section titles, studio blocks, and floor plans header
+  const sections = document.querySelectorAll<HTMLElement>(
+    '#studio, .next-project-section, .plans-header'
+  );
   sections.forEach((sec) => {
     const trigger = ScrollTrigger.create({
       trigger: sec,
@@ -101,7 +103,7 @@ function destroy() {
   triggers.forEach((t) => t.kill());
   triggers = [];
   ScrollTrigger.getAll().forEach((t) => t.kill());
-  gsap.set('h1, .project-card, #studio, .next-project-section', {
+  gsap.set('h1, .project-card, #studio, .next-project-section, .plans-header', {
     clearProps: 'all',
   });
 }
