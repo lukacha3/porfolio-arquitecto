@@ -34,7 +34,12 @@ Conexión de la home con datos reales de Sanity:
 
 Página de proyecto con galería horizontal:
 - Rutas dinámicas `/projekt/[slug]` generadas al compilar para cada proyecto publicado en Sanity.
-- Galería horizontal en `src/components/ProjectGallery.astro`: scroll-snap CSS, altura unificada, proporciones naturales (verticales y horizontales sin deformación), navegación por botones, teclado (flechas) y táctil/trackpad.
+- Galería horizontal centrada en `src/components/ProjectGallery.astro`: carrusel con `scroll-snap-align: center` y la imagen activa destacada en el centro de la pantalla.
+  - Proporciones naturales y soporte vertical universal: ancho dinámico proporcional calculado en base al aspect ratio real (`aspect-ratio` e inline calculation). Para imágenes horizontales la slide ocupa ~60vw (asomando ~1/4 de las vecinas); para imágenes verticales el contenedor se ajusta sin espacio vacío lateral, logrando que se aprecie la mitad (~50%) de la imagen vertical al asomarse.
+  - Foco y nitidez total: sin difuminado/blur, manteniendo todas las fotos 100% nítidas. La diapositiva activa resalta mediante opacidad completa (1.0) y escala natural, mientras las inactivas se atenúan suavemente (`opacity: 0.55`, `scale: 0.96`) con transiciones suaves (400ms).
+  - Centrado dinámico inteligente: cálculo de padding start/end automático en el track para garantizar que la primera y última diapositiva queden siempre perfectamente centradas sin importar si son horizontales o verticales.
+  - Interactividad completa: navegación por botones prev/next, clic directo en cualquier vecina para centrarla, swipe/trackpad fluido y navegación por teclado (flechas, Home, End, Enter/Espacio).
+  - Progressive enhancement y accesibilidad: sin JS todas las imágenes permanecen nítidas y navegables mediante scroll horizontal nativo; respeta estrictamente `prefers-reduced-motion: reduce`. Si hay una sola imagen, se muestra centrada sin controles.
 - Fila de datos (kategori, år, fotograf), descripción estructurada y enlace a "Nästa projekt" con ciclo al primer proyecto.
 - Metadatos de SEO y Open Graph (`og:title`, `og:description`, `og:image`) específicos por proyecto.
 - Enlaces de las tarjetas de la home conectados a cada página de proyecto respetando el `base` de GitHub Pages.
