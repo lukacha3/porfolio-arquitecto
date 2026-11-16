@@ -21,10 +21,11 @@
   --font-mono: "DM Mono", ui-monospace, monospace;
 
   /* Fluid type scale */
-  --text-display:   clamp(2.5rem, 7vw, 6.5rem);   /* 40 → 104 px */
-  --text-h2:        clamp(2rem, 4.6vw, 4rem);      /* 32 → 64 px  */
-  --text-statement: clamp(1.625rem, 3.4vw, 3rem);  /* 26 → 48 px  */
-  --text-closing:   clamp(2.5rem, 8vw, 8rem);      /* 40 → 128 px */
+  --text-display:   clamp(2.5rem, 7vw, 6.5rem);     /* 40 → 104 px */
+  --text-h2:        clamp(2rem, 4.6vw, 4rem);       /* 32 → 64 px  */
+  --text-section:   clamp(1.625rem, 3.4vw, 3rem);   /* 26 → 48 px  */
+  --text-statement: var(--text-section);            /* 26 → 48 px  */
+  --text-closing:   clamp(2.5rem, 8vw, 8rem);       /* 40 → 128 px */
 
   /* Layout */
   --spacing-gutter: clamp(1.25rem, 4vw, 3.5rem);   /* 20 → 56 px  */
@@ -66,6 +67,15 @@
     max-width: 100%;
     display: block;
   }
+}
+
+/* ── Shared Section Title ──────────────────────────────────── */
+.section-title {
+  font-family: var(--font-sans);
+  font-size: var(--text-section);
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
 }
 
 /* ── Entrance animation ────────────────────────────────────── */

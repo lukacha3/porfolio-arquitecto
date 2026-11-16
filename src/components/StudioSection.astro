@@ -24,18 +24,13 @@ const sanityServices = services && services.length > 0 ? services.slice(0, 3) : 
   "
 >
   <!-- Label column -->
-  <div style="flex: 1 1 200px;">
-    <span
-      style="
-        font-family: var(--font-mono);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--color-muted);
-      "
+  <div style="flex: 1 1 240px;">
+    <h2
+      class="section-title"
+      style="margin: 0;"
     >
       {site.studio.label}
-    </span>
+    </h2>
   </div>
 
   <!-- Main column -->
@@ -44,13 +39,8 @@ const sanityServices = services && services.length > 0 ? services.slice(0, 3) : 
     <div style="max-width: 28ch; margin: 0 0 80px;">
       {paragraphs.map((para) => (
         <p
-          style="
-            font-size: var(--text-statement);
-            font-weight: 300;
-            line-height: 1.18;
-            letter-spacing: -0.025em;
-            margin: 0 0 24px;
-          "
+          class="section-title"
+          style="margin: 0 0 24px;"
         >
           {para}
         </p>
