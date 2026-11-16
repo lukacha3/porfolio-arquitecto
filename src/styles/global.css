@@ -62,10 +62,23 @@
     border-radius: 2px;
   }
 
+  /* Suppress outline on programmatic focus targets (sections/headings) */
+  [tabindex="-1"]:focus {
+    outline: none;
+  }
+
   img,
   svg {
     max-width: 100%;
     display: block;
+  }
+
+  #main,
+  #om-mig,
+  #projekt,
+  #studio,
+  #kontakt {
+    scroll-margin-top: var(--header-offset, calc(72px + var(--preview-offset, 0px)));
   }
 }
 

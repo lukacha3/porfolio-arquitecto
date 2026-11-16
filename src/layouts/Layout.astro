@@ -59,7 +59,10 @@ const canonicalUrl = new URL(Astro.url.pathname, siteOrigin).href;
       <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     )}
   </head>
-  <body class="bg-ground text-ink font-sans min-h-screen">
+  <body
+    class="bg-ground text-ink font-sans min-h-screen"
+    style={isPreview ? "--preview-offset: 34px;" : undefined}
+  >
     <!-- Skip to content link for accessibility -->
     <a href="#main" class="skip-link">Hoppa till innehåll</a>
 
