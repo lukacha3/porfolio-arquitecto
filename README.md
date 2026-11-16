@@ -81,6 +81,7 @@ Pulido final de movimiento, accesibilidad (a11y), rendimiento y SEO:
   - `robots.txt` que bloquea el indexado de `/admin/` y enlaza el sitemap con instrucciones en sueco.
   - Structured Data JSON-LD enriquecido: `ProfessionalService` en la portada y `VisualArtwork` en páginas de proyectos.
   - Etiquetas canónicas (`rel="canonical"`) dinámicas y etiquetas Open Graph / Twitter completas con imágenes reales de Sanity.
+  - **Favicons adaptativos (`public/` y `scripts/generate-favicons.mjs`)**: `favicon.svg` limpio con soporte automático para pestañas claras/oscuras (`prefers-color-scheme: dark`), `favicon.ico` multiresolución (`16×16` y `32×32` con líneas reforzadas para legibilidad en tamaños chicos), `favicon-96x96.png` y `apple-touch-icon.png` (`180×180` con fondo sólido `--color-ground` y margen de ~12%), enlazados en `src/layouts/Layout.astro` respetando el `base` de GitHub Pages (`/porfolio-arquitecto/`).
 - **Página 404 personalizada**: Página `404.astro` en sueco ("Sidan kunde inte hittas.") con navegación clara de retorno a la portada.
 - **Barra de navegación superior fija (`src/components/Header.astro`)**:
   - Posicionada con `position: sticky; top: var(--preview-offset, 0px); z-index: 900` para permanecer siempre visible en todas las páginas públicas (home, proyectos y 404) sin superponerse con la barra de modo preview ni con el toast de copiado o el skip-link.

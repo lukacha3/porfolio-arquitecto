@@ -32,7 +32,10 @@ const canonicalUrl = new URL(Astro.url.pathname, siteOrigin).href;
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="canonical" href={canonicalUrl} />
-    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    <link rel="icon" href={`${base}/favicon-96x96.png`} sizes="96x96" type="image/png" />
+    <link rel="icon" href={`${base}/favicon.ico`} sizes="32x32" />
+    <link rel="apple-touch-icon" href={`${base}/apple-touch-icon.png`} />
 
     <!-- Mark js presence early to prevent layout shift and hide-without-js -->
     <script is:inline>
