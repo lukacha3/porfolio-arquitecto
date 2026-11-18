@@ -76,6 +76,7 @@ Pulido final de movimiento, accesibilidad (a11y), rendimiento y SEO:
   - Progressive enhancement: el contenido es 100% visible e interactivo si JavaScript está deshabilitado.
   - Skip-link accesible ("Hoppa till innehåll") enfocado en `#main` con indicador de foco visible (`--color-accent`).
   - Hovers y zooms de imágenes limitados a pantallas con cursor real (`@media (hover: hover)`) y con factor moderado (1.035) para evitar saltos en pantallas táctiles.
+  - **Efecto "Modo cine" (Ambient Glow) en tarjetas de la portada (`src/components/ProjectCard.astro`)**: resplandor difuminado detrás de cada tarjeta de proyecto al pasar el cursor (`@media (hover: hover) and (pointer: fine)`) o hacer foco con teclado (`:focus-visible`), generado a partir de una miniatura ultraliviana del CDN de Sanity (`width(64).quality(50)`, `loading="lazy"`) con `filter: blur(48px) saturate(1.55)`, `transform: scale(1.09)` y `opacity: 0.72` (con transición de `450ms` y respetando `prefers-reduced-motion`).
 - **SEO & Metadatos**:
   - Sitemap XML automático generado con `@astrojs/sitemap`, excluyendo `/admin` y deshabilitado en compilaciones de preview.
   - `robots.txt` que bloquea el indexado de `/admin/` y enlaza el sitemap con instrucciones en sueco.

@@ -1,6 +1,7 @@
 ---
 import type { SanityProject } from "../lib/queries";
 import { getImageProps } from "../lib/images";
+import { urlFor } from "../lib/sanity";
 import PlaceholderArt from "./PlaceholderArt.astro";
 
 interface Props {
@@ -19,6 +20,9 @@ const delay = position * 80; // ms
 
 const displayNumber = String(index + 1).padStart(2, "0");
 const imageProps = getImageProps(project.coverImage);
+const ambientSrc = project.coverImage?.asset
+  ? urlFor(project.coverImage).width(64).auto("format").quality(50).url()
+  : null;
 const categorySlug = project.category?.slug || "";
 ---
 
@@ -32,33 +36,48 @@ const categorySlug = project.category?.slug || "";
   `}
 >
   <a href={`${base}/projekt/${project.slug}`} class="card-link" aria-label={project.title}>
-    <!-- Image box -->
-    <div
-      class="card-image"
-      style="background: var(--color-surface, #e5e5e5); color: var(--color-ink);"
-    >
-      {imageProps ? (
-        <img
-          src={imageProps.src}
-          srcset={imageProps.srcset}
-          sizes={isWide ? "(min-width: 1024px) 60vw, 100vw" : "(min-width: 1024px) 35vw, 100vw"}
-          width={imageProps.width}
-          height={imageProps.height}
-          alt={imageProps.alt}
-          loading={isFirst ? "eager" : "lazy"}
-          decoding={isFirst ? "auto" : "async"}
-          fetchpriority={isFirst ? "high" : "auto"}
-          style={`
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: ${imageProps.objectPosition};
-            display: block;
-          `}
-        />
-      ) : (
-        <PlaceholderArt variant="a" id={project.slug} />
+    <div class="card-media-wrap">
+      {imageProps && ambientSrc && (
+        <div class="card-ambient" aria-hidden="true">
+          <img
+            src={ambientSrc}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            draggable="false"
+            style={`object-position: ${imageProps.objectPosition};`}
+          />
+        </div>
       )}
+
+      <!-- Image box -->
+      <div
+        class="card-image"
+        style="background: var(--color-surface, #e5e5e5); color: var(--color-ink);"
+      >
+        {imageProps ? (
+          <img
+            src={imageProps.src}
+            srcset={imageProps.srcset}
+            sizes={isWide ? "(min-width: 1024px) 60vw, 100vw" : "(min-width: 1024px) 35vw, 100vw"}
+            width={imageProps.width}
+            height={imageProps.height}
+            alt={imageProps.alt}
+            loading={isFirst ? "eager" : "lazy"}
+            decoding={isFirst ? "auto" : "async"}
+            fetchpriority={isFirst ? "high" : "auto"}
+            style={`
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              object-position: ${imageProps.objectPosition};
+              display: block;
+            `}
+          />
+        ) : (
+          <PlaceholderArt variant="a" id={project.slug} />
+        )}
+      </div>
     </div>
 
     <!-- Card footer -->
@@ -78,6 +97,10 @@ const categorySlug = project.category?.slug || "";
 </li>
 
 <style>
+  .project-card {
+    position: relative;
+  }
+
   .card-link {
     display: block;
     color: inherit;
@@ -90,14 +113,63 @@ const categorySlug = project.category?.slug || "";
     border-radius: 2px;
   }
 
+  .card-media-wrap {
+    position: relative;
+  }
+
+  .card-ambient {
+    --ambient-x: 0px;
+    --ambient-y: 0px;
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: var(--radius-image);
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(1.01);
+    filter: blur(48px) saturate(1.35);
+    transition:
+      opacity 450ms ease,
+      transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .card-ambient img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-image);
+    display: block;
+  }
+
   .card-image {
+    position: relative;
+    z-index: 2;
     height: 440px;
     overflow: hidden;
+    border-radius: var(--radius-image);
+    isolation: isolate;
+    transform: translateZ(0);
   }
 
   .card-image img,
   .card-image svg {
     transition: transform 1.2s ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .card-ambient {
+      display: block;
+    }
+
+    .card-link:hover .card-ambient {
+      opacity: 0.70;
+      transform: translate3d(var(--ambient-x, 0px), var(--ambient-y, 0px), 0) scale(1.06);
+      transition:
+        opacity 450ms ease,
+        transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
+    }
   }
 
   @media (hover: hover) {
@@ -111,15 +183,35 @@ const categorySlug = project.category?.slug || "";
     }
   }
 
+  .card-link:focus-visible .card-ambient {
+    display: block;
+    opacity: 0.70;
+    transform: translate3d(0, 0, 0) scale(1.06);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .card-image img,
-    .card-image svg { transition: none; }
+    .card-image svg,
+    .card-ambient {
+      transition: none;
+    }
     .card-link:hover .card-image img,
-    .card-link:hover .card-image svg { transform: none; }
-    .card-arrow { transition: none; }
+    .card-link:hover .card-image svg {
+      transform: none;
+    }
+    .card-ambient,
+    .card-link:hover .card-ambient,
+    .card-link:focus-visible .card-ambient {
+      transform: scale(1.06) translateZ(0);
+    }
+    .card-arrow {
+      transition: none;
+    }
   }
 
   .card-footer {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -167,3 +259,65 @@ const categorySlug = project.category?.slug || "";
     color: var(--color-muted);
   }
 </style>
+
+<script>
+  function initDynamicAmbientGlow() {
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    ) {
+      return;
+    }
+
+    const MAX_SHIFT_X = 22; // px
+    const MAX_SHIFT_Y = 18; // px
+
+    document.querySelectorAll<HTMLElement>(".card-media-wrap").forEach((wrap) => {
+      if (wrap.dataset.ambientBound === "true") return;
+      const ambient = wrap.querySelector<HTMLElement>(".card-ambient");
+      if (!ambient) return;
+      wrap.dataset.ambientBound = "true";
+
+      let rafId = 0;
+
+      wrap.addEventListener(
+        "pointermove",
+        (e: PointerEvent) => {
+          if (e.pointerType !== "mouse") return;
+          cancelAnimationFrame(rafId);
+          const clientX = e.clientX;
+          const clientY = e.clientY;
+
+          rafId = requestAnimationFrame(() => {
+            const rect = wrap.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+
+            // Normalized cursor position from -1 (left/top) to +1 (right/bottom)
+            const nx = ((clientX - rect.left) / rect.width - 0.5) * 2;
+            const ny = ((clientY - rect.top) / rect.height - 0.5) * 2;
+
+            const shiftX = (nx * MAX_SHIFT_X).toFixed(1);
+            const shiftY = (ny * MAX_SHIFT_Y).toFixed(1);
+
+            ambient.style.setProperty("--ambient-x", `${shiftX}px`);
+            ambient.style.setProperty("--ambient-y", `${shiftY}px`);
+          });
+        },
+        { passive: true }
+      );
+
+      wrap.addEventListener(
+        "pointerleave",
+        () => {
+          cancelAnimationFrame(rafId);
+          ambient.style.setProperty("--ambient-x", "0px");
+          ambient.style.setProperty("--ambient-y", "0px");
+        },
+        { passive: true }
+      );
+    });
+  }
+
+  initDynamicAmbientGlow();
+  document.addEventListener("astro:page-load", initDynamicAmbientGlow);
+</script>

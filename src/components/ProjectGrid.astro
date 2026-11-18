@@ -67,6 +67,8 @@ const { projects, categories } = Astro.props;
     <ul
       id="project-grid"
       style="
+        position: relative;
+        isolation: isolate;
         display: flex;
         flex-wrap: wrap;
         align-items: flex-start;
@@ -144,6 +146,14 @@ const { projects, categories } = Astro.props;
         btn.addEventListener("click", () => {
           applyFilter(btn.dataset.category ?? "all");
         });
+      });
+
+      // Remove .reveal once its entrance keyframe ends so cards don't trap stacking contexts
+      grid.addEventListener("animationend", (e: AnimationEvent) => {
+        const card = (e.target as HTMLElement | null)?.closest(".project-card");
+        if (card) {
+          card.classList.remove("reveal");
+        }
       });
     }
   </script>

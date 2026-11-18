@@ -123,13 +123,13 @@ const portraitAlt =
   .about-left {
     min-width: 0;
     width: 100%;
-    margin-left: 40px;
+    margin-left: 20px;
   }
 
   .about-card {
     max-width: 80ch;
     padding: clamp(24px, 3vw, 36px);
-    border-radius: 14px;
+    border-radius: var(--radius-image);
     border: 1px solid var(--color-line);
     background-color: color-mix(in srgb, var(--color-ink) 2%, var(--color-ground));
     margin-bottom: 28px;
@@ -232,14 +232,14 @@ const portraitAlt =
     width: 100%;
     height: auto;
     object-fit: contain;
-    border-radius: 14px;
+    border-radius: var(--radius-image);
     display: block;
   }
 
   @media (min-width: 900px) {
     .about-right {
       position: relative;
-      left: -90px; /* <-- Positivo = derecha, Negativo = izquierda (ej. -30px o 30px) */
+      left: -30px; /* <-- Positivo = derecha, Negativo = izquierda (ej. -30px o 30px) */
       top: 0px;  /* <-- Positivo = abajo, Negativo = arriba (ej. -20px o 20px) */
       max-width: none;
       margin-inline: 0;

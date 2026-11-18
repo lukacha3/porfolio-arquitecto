@@ -68,6 +68,9 @@ const descriptionParagraphs = project.description
 
 // Next project image helper
 const nextImage = nextProject ? getImageProps(nextProject.coverImage) : null;
+const nextAmbientSrc = nextProject?.coverImage?.asset
+  ? urlFor(nextProject.coverImage).width(64).auto("format").quality(50).url()
+  : null;
 
 // JSON-LD structured data for Project
 const siteOrigin = Astro.site ? new URL(Astro.site).origin : "https://lukacha3.github.io";
@@ -223,12 +226,16 @@ const projectJsonLd = {
       <section
         class="next-project-section"
         style="
+          position: relative;
+          isolation: isolate;
           padding: 120px var(--spacing-gutter) 140px;
           border-top: 1px solid var(--color-line);
         "
       >
         <div
           style="
+            position: relative;
+            z-index: 2;
             font-family: var(--font-mono);
             font-size: 12px;
             text-transform: uppercase;
@@ -250,41 +257,63 @@ const projectJsonLd = {
             color: inherit;
           "
         >
-          <div
-            class="next-project-image-box"
-            style="
-              width: 100%;
-              height: clamp(300px, 45vw, 560px);
-              overflow: hidden;
-              background: var(--color-surface, #e5e5e5);
-              margin-bottom: 24px;
-            "
-          >
-            {nextImage ? (
-              <img
-                src={nextImage.src}
-                srcset={nextImage.srcset}
-                sizes="100vw"
-                width={nextImage.width}
-                height={nextImage.height}
-                alt={nextImage.alt}
-                loading="lazy"
-                decoding="async"
-                style={`
-                  width: 100%;
-                  height: 100%;
-                  object-fit: cover;
-                  object-position: ${nextImage.objectPosition};
-                  display: block;
-                `}
-              />
-            ) : (
-              <PlaceholderArt variant="hero" id={nextProject.slug} />
+          <div class="next-project-media-wrap">
+            {nextImage && nextAmbientSrc && (
+              <div class="next-project-ambient" aria-hidden="true">
+                <img
+                  src={nextAmbientSrc}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  draggable="false"
+                  style={`object-position: ${nextImage.objectPosition};`}
+                />
+              </div>
             )}
+
+            <div
+              class="next-project-image-box"
+              style="
+                position: relative;
+                z-index: 2;
+                width: 100%;
+                height: clamp(300px, 45vw, 560px);
+                overflow: hidden;
+                border-radius: var(--radius-image);
+                isolation: isolate;
+                transform: translateZ(0);
+                background: var(--color-surface, #e5e5e5);
+                margin-bottom: 24px;
+              "
+            >
+              {nextImage ? (
+                <img
+                  src={nextImage.src}
+                  srcset={nextImage.srcset}
+                  sizes="100vw"
+                  width={nextImage.width}
+                  height={nextImage.height}
+                  alt={nextImage.alt}
+                  loading="lazy"
+                  decoding="async"
+                  style={`
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    object-position: ${nextImage.objectPosition};
+                    display: block;
+                  `}
+                />
+              ) : (
+                <PlaceholderArt variant="hero" id={nextProject.slug} />
+              )}
+            </div>
           </div>
 
           <div
             style="
+              position: relative;
+              z-index: 2;
               display: flex;
               justify-content: space-between;
               align-items: baseline;
@@ -326,9 +355,53 @@ const projectJsonLd = {
     border-radius: 2px;
   }
 
+  .next-project-media-wrap {
+    position: relative;
+  }
+
+  .next-project-ambient {
+    --ambient-x: 0px;
+    --ambient-y: 0px;
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: var(--radius-image);
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(1.01);
+    filter: blur(48px) saturate(1.35);
+    transition:
+      opacity 450ms ease,
+      transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .next-project-ambient img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-image);
+    display: block;
+  }
+
   .next-project-image-box img,
   .next-project-image-box svg {
     transition: transform 1.2s ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .next-project-ambient {
+      display: block;
+    }
+
+    .next-project-link:hover .next-project-ambient {
+      opacity: 0.45;
+      transform: translate3d(var(--ambient-x, 0px), var(--ambient-y, 0px), 0) scale(1.06);
+      transition:
+        opacity 450ms ease,
+        transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
+    }
   }
 
   @media (hover: hover) {
@@ -341,6 +414,12 @@ const projectJsonLd = {
       transform: translateX(8px);
       opacity: 1 !important;
     }
+  }
+
+  .next-project-link:focus-visible .next-project-ambient {
+    display: block;
+    opacity: 0.45;
+    transform: translate3d(0, 0, 0) scale(1.06);
   }
 
   .next-arrow {
@@ -357,9 +436,68 @@ const projectJsonLd = {
   @media (prefers-reduced-motion: reduce) {
     .next-project-image-box img,
     .next-project-image-box svg,
+    .next-project-ambient,
     .next-arrow {
       transition: none;
       transform: none !important;
     }
   }
 </style>
+
+<script>
+  function initNextProjectAmbient() {
+    if (
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    ) {
+      return;
+    }
+
+    const MAX_SHIFT_X = 24;
+    const MAX_SHIFT_Y = 20;
+
+    document.querySelectorAll<HTMLElement>(".next-project-media-wrap").forEach((wrap) => {
+      if (wrap.dataset.ambientBound === "true") return;
+      const ambient = wrap.querySelector<HTMLElement>(".next-project-ambient");
+      if (!ambient) return;
+      wrap.dataset.ambientBound = "true";
+
+      let rafId = 0;
+
+      wrap.addEventListener(
+        "pointermove",
+        (e: PointerEvent) => {
+          if (e.pointerType !== "mouse") return;
+          cancelAnimationFrame(rafId);
+          const clientX = e.clientX;
+          const clientY = e.clientY;
+
+          rafId = requestAnimationFrame(() => {
+            const rect = wrap.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) return;
+
+            const nx = ((clientX - rect.left) / rect.width - 0.5) * 2;
+            const ny = ((clientY - rect.top) / rect.height - 0.5) * 2;
+
+            ambient.style.setProperty("--ambient-x", `${(nx * MAX_SHIFT_X).toFixed(1)}px`);
+            ambient.style.setProperty("--ambient-y", `${(ny * MAX_SHIFT_Y).toFixed(1)}px`);
+          });
+        },
+        { passive: true }
+      );
+
+      wrap.addEventListener(
+        "pointerleave",
+        () => {
+          cancelAnimationFrame(rafId);
+          ambient.style.setProperty("--ambient-x", "0px");
+          ambient.style.setProperty("--ambient-y", "0px");
+        },
+        { passive: true }
+      );
+    });
+  }
+
+  initNextProjectAmbient();
+  document.addEventListener("astro:page-load", initNextProjectAmbient);
+</script>
