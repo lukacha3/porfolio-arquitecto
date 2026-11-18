@@ -20,6 +20,7 @@ Integración con Sanity CMS:
   - `aboutText` ("Om mig"): texto enriquecido Portable Text (párrafos, negrita, cursiva y enlaces) renderizado en el servidor mediante `src/lib/portableText.ts`.
   - `portrait` ("Porträtt"): foto de retrato con `hotspot: true` y validación de `alt` obligatorio cuando se sube imagen.
   - `tools` ("Verktyg"): lista cerrada y ordenable (drag & drop) de herramientas (`Revit`, `AutoCAD`, `Archicad`, `Lumion`, `Blender`), renderizadas con `src/components/ToolChip.astro` y `src/data/tools.ts` con iluminación en su color oficial de marca al pasar el cursor (`@media (hover: hover)`).
+  - `education` ("Utbildning"): lista ordenable (drag & drop) de trayectoria académica debajo de "Om mig", con `degree` (*Examen / titel*), `institution` (*Lärosäte*), `years` (*År*) y `logo` (*Logotyp*, PNG/SVG transparente alineado a la derecha del título con la misma altura de renglón `1.2em`).
 - Validaciones estrictas: `title` y `coverImage` obligatorios en proyectos.
 - Generación automática de slugs adaptada a caracteres suecos (å, ä, ö).
 - Ordenamiento manual de proyectos mediante **drag & drop** en Sanity Studio (`@sanity/orderable-document-list` con `orderRank` y proyectos nuevos ubicados al inicio `newItemPosition: 'before'`), reflejado en la portada, filtro por categorías y ciclo de "Nästa projekt".

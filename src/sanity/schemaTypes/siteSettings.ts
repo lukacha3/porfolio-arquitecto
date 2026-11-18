@@ -100,6 +100,74 @@ export const siteSettings = defineType({
       ],
     }),
     defineField({
+      name: 'education',
+      title: 'Utbildning',
+      description: 'Lägg till din utbildning. Dra för att ändra ordningen.',
+      type: 'array',
+      fieldset: 'omMig',
+      options: {
+        sortable: true,
+      },
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'educationItem',
+          title: 'Utbildning',
+          fields: [
+            defineField({
+              name: 'degree',
+              title: 'Examen / titel',
+              type: 'string',
+              validation: (Rule) => Rule.required().error('Examen / titel är obligatorisk'),
+            }),
+            defineField({
+              name: 'institution',
+              title: 'Lärosäte',
+              type: 'string',
+            }),
+            defineField({
+              name: 'years',
+              title: 'År',
+              type: 'string',
+            }),
+            defineField({
+              name: 'logo',
+              title: 'Logotyp',
+              description: 'Helst en PNG, WebP eller SVG med transparent bakgrund.',
+              type: 'image',
+              options: {
+                accept: 'image/png,image/jpeg,image/webp,image/svg+xml,image/gif',
+              },
+              fields: [
+                defineField({
+                  name: 'alt',
+                  title: 'Alternativ text (alt)',
+                  description: 'Om fältet lämnas tomt används lärosätets namn.',
+                  type: 'string',
+                }),
+              ],
+            }),
+          ],
+          preview: {
+            select: {
+              degree: 'degree',
+              institution: 'institution',
+              years: 'years',
+              media: 'logo',
+            },
+            prepare({ degree, institution, years, media }) {
+              const subtitle = [institution, years].filter(Boolean).join(' · ');
+              return {
+                title: degree || 'Utbildning',
+                subtitle: subtitle || undefined,
+                media,
+              };
+            },
+          },
+        }),
+      ],
+    }),
+    defineField({
       name: 'tools',
       title: 'Verktyg',
       description: 'Välj vilka program/verktyg som ska visas och dra för att ändra ordning.',

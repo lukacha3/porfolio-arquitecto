@@ -1,7 +1,13 @@
 ---
 import { site } from "../data/site";
-import type { SanityCoverImage, SanityPortableTextBlock } from "../lib/queries";
+import type {
+  SanityCoverImage,
+  SanityEducationItem,
+  SanityEducationLogo,
+  SanityPortableTextBlock,
+} from "../lib/queries";
 import { getImageProps } from "../lib/images";
+import { urlFor } from "../lib/sanity";
 import { renderAboutParagraphs } from "../lib/portableText";
 import { resolveTools } from "../data/tools";
 import ToolChip from "./ToolChip.astro";
@@ -12,6 +18,7 @@ interface Props {
   fallbackAbout?: string | null;
   portrait?: SanityCoverImage | null;
   tools?: string[] | null;
+  education?: SanityEducationItem[] | null;
   studioName?: string | null;
 }
 
@@ -20,6 +27,7 @@ const {
   fallbackAbout,
   portrait,
   tools,
+  education,
   studioName,
 } = Astro.props;
 
@@ -28,10 +36,37 @@ const paragraphs = renderAboutParagraphs(
   fallbackAbout || site.aboutMe.defaultText
 );
 const resolvedTools = resolveTools(tools);
+const validEducation = (education || []).filter((item) =>
+  Boolean(item?.degree?.trim())
+);
 const portraitProps = getImageProps(portrait);
 const hasPortrait = Boolean(portraitProps);
 const portraitAlt =
   portraitProps?.alt?.trim() || studioName || site.studioName;
+
+function getEducationLogoProps(
+  logo?: SanityEducationLogo | null,
+  fallbackAlt = ""
+): { src: string; width: number; height: number; alt: string } | null {
+  if (!logo?.asset?._ref) return null;
+  const isSvg = logo.asset._ref.endsWith("-svg");
+  const src = isSvg
+    ? urlFor(logo).url()
+    : urlFor(logo).height(96).auto("format").url();
+  const dims = logo.dimensions;
+  const aspect =
+    dims?.aspectRatio ||
+    (dims?.width && dims?.height ? dims.width / dims.height : 1);
+  const height = 96;
+  const width = Math.max(1, Math.round(height * aspect));
+
+  return {
+    src,
+    width,
+    height,
+    alt: logo.alt?.trim() || fallbackAlt,
+  };
+}
 ---
 
 <section
@@ -41,7 +76,7 @@ const portraitAlt =
 >
   <div class="about-container">
     <div class="about-grid">
-      <!-- Left Column: Section Heading (H1) + Bio + Tools -->
+      <!-- Left Column: Section Heading (H1) + Bio + Education + Tools -->
       <div class="about-left">
         <div class="about-card about-reveal">
           <h1 id="about-heading" class="section-title about-heading">
@@ -56,6 +91,45 @@ const portraitAlt =
             </div>
           )}
         </div>
+
+        <!-- Academic Trajectory / Education ("Utbildning") -->
+        {validEducation.length > 0 && (
+          <div class="about-education about-reveal">
+            <h3 class="about-education__label">{site.aboutMe.educationLabel}</h3>
+            <ol class="about-education__list">
+              {validEducation.map((item) => {
+                const degreeText = item.degree.trim();
+                const institutionText = item.institution?.trim() || "";
+                const yearsText = item.years?.trim() || "";
+                const metaLine = [institutionText, yearsText].filter(Boolean).join(" · ");
+                const logoProps = getEducationLogoProps(
+                  item.logo,
+                  institutionText || degreeText
+                );
+
+                return (
+                  <li class="education-item">
+                    <div class="education-item__header">
+                      <span class="education-item__degree">{degreeText}</span>
+                      {logoProps && (
+                        <img
+                          src={logoProps.src}
+                          width={logoProps.width}
+                          height={logoProps.height}
+                          alt={logoProps.alt}
+                          loading="lazy"
+                          decoding="async"
+                          class="education-item__logo"
+                        />
+                      )}
+                    </div>
+                    {metaLine && <p class="education-item__meta">{metaLine}</p>}
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        )}
 
         {resolvedTools.length > 0 && (
           <div class="about-tools about-reveal">
@@ -214,6 +288,77 @@ const portraitAlt =
     list-style: none;
     margin: 0;
     padding: 0;
+  }
+
+  /* ── Education ("Utbildning") ────────────────────────────────── */
+  .about-education {
+    margin: 0 0 28px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--color-line);
+    max-width: 80ch;
+  }
+
+  .about-education__label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+    margin: 0 0 18px;
+  }
+
+  .about-education__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .education-item {
+    padding-bottom: 16px;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-line) 60%, transparent);
+  }
+
+  .education-item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .education-item__header {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35em 0.6em;
+    font-size: clamp(1.125rem, 1.5vw, 1.35rem);
+    font-weight: 400;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    color: var(--color-ink);
+  }
+
+  .education-item__degree {
+    display: inline-block;
+  }
+
+  .education-item__logo {
+    height: 1.2em;
+    width: auto;
+    max-width: 6em;
+    object-fit: contain;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  .education-item__meta {
+    margin: 6px 0 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.45;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
   }
 
   .about-right {

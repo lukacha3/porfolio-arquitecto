@@ -17,6 +17,7 @@ export const site = {
   aboutMe: {
     label: "Om mig",
     toolsLabel: "Verktyg",
+    educationLabel: "Utbildning",
     defaultText:
       "Arkitekt med fokus på platsanpassad gestaltning, genomtänkta materialval och hög detaljprecision — från tidiga skisser och 3D-visualisering till färdig bygghandling.",
   },

@@ -23,6 +23,14 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: [
+        'sanity',
+        'sanity/structure',
+        '@sanity/vision',
+        '@sanity/orderable-document-list',
+      ],
+    },
   },
 
   integrations: [

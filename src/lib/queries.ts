@@ -93,12 +93,30 @@ export interface SanityPortableTextBlock {
   markDefs?: SanityPortableTextMarkDef[];
 }
 
+export interface SanityEducationLogo {
+  alt?: string | null;
+  asset?: {
+    _ref: string;
+    _type?: string;
+  } | null;
+  dimensions?: SanityDimensions | null;
+}
+
+export interface SanityEducationItem {
+  _key: string;
+  degree: string;
+  institution?: string | null;
+  years?: string | null;
+  logo?: SanityEducationLogo | null;
+}
+
 export interface SanitySiteSettings {
   studioName?: string | null;
   headline?: string | null;
   aboutText?: SanityPortableTextBlock[] | string | null;
   portrait?: SanityCoverImage | null;
   tools?: string[] | null;
+  education?: SanityEducationItem[] | null;
   about?: string | null;
   services?: string[] | null;
   email?: string | null;
@@ -151,6 +169,21 @@ export const SITE_SETTINGS_QUERY = `*[_type == "siteSettings"][0] {
     }
   },
   tools,
+  "education": education[] {
+    _key,
+    degree,
+    institution,
+    years,
+    logo {
+      alt,
+      asset,
+      "dimensions": asset->metadata.dimensions {
+        width,
+        height,
+        aspectRatio
+      }
+    }
+  },
   about,
   services,
   email,

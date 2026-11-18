@@ -87,6 +87,7 @@ const hasSpecs = validSpecs.length > 0;
 
 // Next project image helper
 const nextImage = nextProject ? getImageProps(nextProject.coverImage) : null;
+const nextAspectRatio = nextImage ? (nextImage.width / nextImage.height).toFixed(4) : "1.7778";
 const nextAmbientSrc = nextProject?.coverImage?.asset
   ? urlFor(nextProject.coverImage).width(64).auto("format").quality(50).url()
   : null;
@@ -234,16 +235,12 @@ const projectJsonLd = {
           </h2>
         </div>
 
-        <div style="padding: 0 var(--spacing-gutter);">
+        <div>
           <a
             href={`${base}/projekt/${nextProject.slug}`}
             class="next-project-link"
             aria-label={`${site.projectPage.nextProject}: ${nextProject.title}`}
-            style="
-              display: block;
-              text-decoration: none;
-              color: inherit;
-            "
+            style={`--next-aspect-ratio: ${nextAspectRatio};`}
           >
             <div class="next-project-media-wrap">
               {nextImage && nextAmbientSrc && (
@@ -259,26 +256,12 @@ const projectJsonLd = {
                 </div>
               )}
 
-              <div
-                class="next-project-image-box"
-                style="
-                  position: relative;
-                  z-index: 2;
-                  width: 100%;
-                  height: clamp(300px, 45vw, 560px);
-                  overflow: hidden;
-                  border-radius: var(--radius-image);
-                  isolation: isolate;
-                  transform: translateZ(0);
-                  background: var(--color-surface, #e5e5e5);
-                  margin-bottom: 24px;
-                "
-              >
+              <div class="next-project-image-box">
                 {nextImage ? (
                   <img
                     src={nextImage.src}
                     srcset={nextImage.srcset}
-                    sizes="100vw"
+                    sizes="(min-width: 768px) 60vw, 80vw"
                     width={nextImage.width}
                     height={nextImage.height}
                     alt={nextImage.alt}
@@ -307,16 +290,10 @@ const projectJsonLd = {
                 align-items: baseline;
               "
             >
-              <span
-                style="
-                  font-size: var(--text-h2);
-                  font-weight: 300;
-                  letter-spacing: -0.03em;
-                "
-              >
+              <span class="next-project-title">
                 {nextProject.title}
               </span>
-              <span class="next-arrow" aria-hidden="true" style="font-size: 28px; opacity: 0.5;">
+              <span class="next-arrow" aria-hidden="true">
                 →
               </span>
             </div>
@@ -499,6 +476,40 @@ const projectJsonLd = {
   }
 
   /* ── 5. Next Project ─────────────────────────────────────────── */
+  .next-project-link {
+    --next-max-width: 48vw; /* <-- ANCHO MÁXIMO DE LA IMAGEN DE NÄSTA PROJEKT (ej. 45vw, 50vw, 55vw, 60vw) */
+    --next-height: clamp(260px, 52vh, 520px); /* <-- ALTO DE LA IMAGEN DE NÄSTA PROJEKT (ej. 48vh, 52vh, 60vh o un valor fijo como 460px) */
+    --next-width: min(
+      calc(var(--next-height) * var(--next-aspect-ratio, 1.7778)),
+      var(--next-max-width)
+    );
+    width: var(--next-width);
+    margin-inline: auto;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  @media (max-width: 767px) {
+    .next-project-link {
+      --next-max-width: 82vw; /* <-- ANCHO MÁXIMO EN CELULAR */
+      --next-height: clamp(220px, 45vh, 380px); /* <-- ALTO EN CELULAR */
+    }
+  }
+
+  .next-project-image-box {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: var(--next-height);
+    overflow: hidden;
+    border-radius: var(--radius-image);
+    isolation: isolate;
+    transform: translateZ(0);
+    background: var(--color-surface, #e5e5e5);
+    margin-bottom: 24px;
+  }
+
   .next-project-media-wrap {
     position: relative;
   }
@@ -566,8 +577,16 @@ const projectJsonLd = {
     transform: translate3d(0, 0, 0) scale(1.06);
   }
 
+  .next-project-title {
+    font-size: clamp(1.35rem, 2.2vw, 2rem); /* <-- TAMAÑO DEL TEXTO DEBAJO DE LA IMAGEN DE NÄSTA PROJEKT (ej. 24px, 28px, 32px) */
+    font-weight: 260;
+    letter-spacing: -0.025em;
+  }
+
   .next-arrow {
     display: inline-block;
+    font-size: 22px; /* <-- TAMAÑO DE LA FLECHA → DE NÄSTA PROJEKT */
+    opacity: 0.5;
     transition: transform 0.3s ease, opacity 0.3s ease;
   }
 
