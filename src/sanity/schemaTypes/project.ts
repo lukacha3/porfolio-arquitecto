@@ -21,6 +21,14 @@ export const project = defineType({
       validation: (Rule) => Rule.required().error('Projekttitel är obligatorisk'),
     }),
     defineField({
+      name: 'tagline',
+      title: 'Kort beskrivning',
+      description: 'En mening som beskriver projektet, visas under titeln.',
+      type: 'string',
+      validation: (Rule) =>
+        Rule.max(120).error('Kort beskrivning får vara högst 120 tecken'),
+    }),
+    defineField({
       name: 'slug',
       title: 'Webbadress',
       type: 'slug',
@@ -77,6 +85,47 @@ export const project = defineType({
       title: 'Beskrivning',
       type: 'text',
       rows: 6,
+    }),
+    defineField({
+      name: 'specs',
+      title: 'Fakta',
+      description: 'Lägg till valfria faktarutor, t.ex. Planlösning, Boyta, Antal rum.',
+      type: 'array',
+      options: {
+        sortable: true,
+      },
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'specItem',
+          title: 'Faktaruta',
+          fields: [
+            defineField({
+              name: 'label',
+              title: 'Rubrik',
+              type: 'string',
+              validation: (Rule) => Rule.required().error('Rubrik är obligatorisk'),
+            }),
+            defineField({
+              name: 'value',
+              title: 'Värde',
+              type: 'string',
+              validation: (Rule) => Rule.required().error('Värde är obligatoriskt'),
+            }),
+          ],
+          preview: {
+            select: {
+              label: 'label',
+              value: 'value',
+            },
+            prepare({ label, value }) {
+              return {
+                title: label && value ? `${label}: ${value}` : label || value || 'Faktaruta',
+              };
+            },
+          },
+        }),
+      ],
     }),
     defineField({
       name: 'gallery',

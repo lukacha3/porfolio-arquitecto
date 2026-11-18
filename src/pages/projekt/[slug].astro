@@ -6,7 +6,14 @@ import ProjectGallery from "../../components/ProjectGallery.astro";
 import ProjectPlans from "../../components/ProjectPlans.astro";
 import PlaceholderArt from "../../components/PlaceholderArt.astro";
 import { site } from "../../data/site";
-import { getProjects, getProjectBySlug, getSiteSettings, type SanityProjectDetail, type SanityProject, type SanitySiteSettings } from "../../lib/queries";
+import {
+  getProjects,
+  getProjectBySlug,
+  getSiteSettings,
+  type SanityProjectDetail,
+  type SanityProject,
+  type SanitySiteSettings,
+} from "../../lib/queries";
 import { getImageProps } from "../../lib/images";
 import { urlFor } from "../../lib/sanity";
 
@@ -44,17 +51,22 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const studioName = siteSettings?.studioName || site.studioName;
 const pageTitle = `${project.title} — ${studioName}`;
 
-// Truncate description for SEO meta without cutting words
-function truncateDescription(text?: string | null): string {
-  if (!text) return site.page.description;
-  const clean = text.replace(/\s+/g, " ").trim();
+const taglineText = project.tagline?.trim() || "";
+
+// Combine tagline and description for SEO meta without cutting words
+function buildMetaDescription(tagline?: string | null, description?: string | null): string {
+  const t = tagline?.trim() || "";
+  const d = description?.trim() || "";
+  const combined = t && d ? `${t} — ${d}` : t || d;
+  if (!combined) return site.page.description;
+  const clean = combined.replace(/\s+/g, " ").trim();
   if (clean.length <= 155) return clean;
   const sub = clean.slice(0, 155);
   const lastSpace = sub.lastIndexOf(" ");
   return (lastSpace > 0 ? sub.slice(0, lastSpace) : sub) + "…";
 }
 
-const metaDescription = truncateDescription(project.description);
+const metaDescription = buildMetaDescription(project.tagline, project.description);
 
 // OG image URL
 const ogImageUrl = project.coverImage?.asset
@@ -65,6 +77,13 @@ const ogImageUrl = project.coverImage?.asset
 const descriptionParagraphs = project.description
   ? project.description.split(/\r?\n+/).filter(Boolean)
   : [];
+const hasDescription = descriptionParagraphs.length > 0;
+
+// Valid technical specs / facts ("Fakta")
+const validSpecs = (project.specs || []).filter(
+  (s) => Boolean(s?.label?.trim()) && Boolean(s?.value?.trim())
+);
+const hasSpecs = validSpecs.length > 0;
 
 // Next project image helper
 const nextImage = nextProject ? getImageProps(nextProject.coverImage) : null;
@@ -81,7 +100,7 @@ const projectJsonLd = {
   "@type": "VisualArtwork",
   name: project.title,
   url: projectUrl,
-  description: project.description || metaDescription,
+  description: project.description || taglineText || metaDescription,
   ...(project.year ? { dateCreated: String(project.year) } : {}),
   ...(project.photographer ? { creator: { "@type": "Person", name: project.photographer } } : {}),
   ...(ogImageUrl ? { image: ogImageUrl } : {}),
@@ -91,248 +110,218 @@ const projectJsonLd = {
 <Layout title={pageTitle} description={metaDescription} image={ogImageUrl} jsonLd={projectJsonLd}>
   <Header studioName={studioName} />
 
-  <main id="main" style="padding-top: 24px;">
+  <main id="main" class="project-main">
     <!-- Back link -->
-    <div style="padding: 0 var(--spacing-gutter); margin-bottom: 40px;">
-      <a
-        href={`${base}/#projekt`}
-        class="back-link"
-        style="
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          font-family: var(--font-mono);
-          font-size: 12px;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          color: var(--color-muted);
-          text-decoration: none;
-          padding: 8px 0;
-        "
-      >
+    <div class="project-container project-back-row">
+      <a href={`${base}/#projekt`} class="back-link">
         ← {site.projectPage.back}
       </a>
     </div>
 
-    <!-- Project Header -->
-    <header style="padding: 0 var(--spacing-gutter); margin-bottom: 32px;">
-      <h1
-        style="
-          font-size: var(--text-display);
-          font-weight: 300;
-          line-height: 1.02;
-          letter-spacing: -0.035em;
-          max-width: 14ch;
-          margin: 0 0 32px;
-        "
-      >
-        {project.title}
-      </h1>
-
-      <!-- Meta row -->
-      <dl
-        style="
-          display: flex;
-          flex-wrap: wrap;
-          gap: 32px;
-          margin: 0;
-          font-family: var(--font-mono);
-          font-size: 12px;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          color: var(--color-muted);
-        "
-      >
-        {project.category?.title && (
-          <div style="display: flex; gap: 8px;">
-            <dt style="color: var(--color-ink-soft);">{site.projectPage.category}:</dt>
-            <dd style="margin: 0; color: var(--color-ink);">{project.category.title}</dd>
-          </div>
-        )}
-        {project.year && (
-          <div style="display: flex; gap: 8px;">
-            <dt style="color: var(--color-ink-soft);">{site.projectPage.year}:</dt>
-            <dd style="margin: 0; color: var(--color-ink);">{project.year}</dd>
-          </div>
-        )}
-        {project.photographer && (
-          <div style="display: flex; gap: 8px;">
-            <dt style="color: var(--color-ink-soft);">{site.projectPage.photographer}:</dt>
-            <dd style="margin: 0; color: var(--color-ink);">{project.photographer}</dd>
-          </div>
-        )}
-      </dl>
-    </header>
-
-    <!-- Description -->
-    {descriptionParagraphs.length > 0 && (
-      <section
-        class="project-description"
-        style="
-          padding: 16px var(--spacing-gutter) 8px;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 24px 48px;
-        "
-      >
-        <div style="flex: 1 1 200px;">
-          <span
-            style="
-              font-family: var(--font-mono);
-              font-size: 12px;
-              text-transform: uppercase;
-              letter-spacing: 0.08em;
-              color: var(--color-muted);
-            "
-          >
-            Beskrivning
-          </span>
-        </div>
-        <div style="flex: 3 1 480px; min-width: 0;">
-          {descriptionParagraphs.map((para, idx) => (
-            <p
-              style={`
-                font-size: var(--text-statement);
-                font-weight: 300;
-                line-height: 1.35;
-                letter-spacing: -0.02em;
-                max-width: 32ch;
-                margin: 0 0 ${idx === descriptionParagraphs.length - 1 ? "0" : "28px"};
-              `}
-            >
-              {para}
-            </p>
-          ))}
-        </div>
-      </section>
-    )}
-
-    <!-- Horizontal Gallery -->
+    <!-- 1. Photo Gallery (top of the page) -->
     <ProjectGallery
       coverImage={project.coverImage}
       gallery={project.gallery}
       projectTitle={project.title}
     />
 
-    <!-- Floor Plans (optional) -->
+    <!-- 2. Title + Tagline + Meta (Left) & Description (Right) -->
+    <section
+      class:list={[
+        "project-container",
+        "project-info-section",
+        { "project-info-section--two-col": hasDescription },
+      ]}
+    >
+      <header class="project-info-left">
+        <h1 class="project-title">
+          {project.title}
+        </h1>
+
+        {taglineText && (
+          <p class="project-tagline">
+            {taglineText}
+          </p>
+        )}
+
+        {(project.category?.title || project.year || project.photographer) && (
+          <dl class="project-meta">
+            {project.category?.title && (
+              <div class="project-meta__item">
+                <dt>{site.projectPage.category}:</dt>
+                <dd>{project.category.title}</dd>
+              </div>
+            )}
+            {project.year && (
+              <div class="project-meta__item">
+                <dt>{site.projectPage.year}:</dt>
+                <dd>{project.year}</dd>
+              </div>
+            )}
+            {project.photographer && (
+              <div class="project-meta__item">
+                <dt>{site.projectPage.photographer}:</dt>
+                <dd>{project.photographer}</dd>
+              </div>
+            )}
+          </dl>
+        )}
+      </header>
+
+      {hasDescription && (
+        <div class="project-description">
+          {descriptionParagraphs.map((para) => (
+            <p class="project-description__text">
+              {para}
+            </p>
+          ))}
+        </div>
+      )}
+    </section>
+
+    <!-- 3. Technical Specs / Facts Row ("Fakta") -->
+    {hasSpecs && (
+      <section
+        class="project-container project-specs-section"
+        aria-label="Fakta"
+      >
+        <dl class="project-specs-grid">
+          {validSpecs.map((spec) => (
+            <div class="project-spec-box">
+              <dt class="project-spec-box__label">{spec.label}</dt>
+              <dd class="project-spec-box__value">{spec.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    )}
+
+    <!-- 4. Floor Plans (optional) -->
     <ProjectPlans
       plans={project.plans}
       hasPlans={project.hasPlans}
       projectTitle={project.title}
     />
 
-    <!-- Next Project -->
+    <!-- 5. Next Project -->
     {nextProject && (
       <section
         class="next-project-section"
         style="
           position: relative;
           isolation: isolate;
-          padding: 120px var(--spacing-gutter) 140px;
+          padding-top: 80px;
+          padding-bottom: 140px;
           border-top: 1px solid var(--color-line);
         "
       >
         <div
+          class="next-project-banner"
           style="
             position: relative;
             z-index: 2;
-            font-family: var(--font-mono);
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--color-muted);
-            margin-bottom: 24px;
+            background: var(--color-ink);
+            color: var(--color-ground);
+            padding: 24px var(--spacing-gutter);
+            margin-bottom: 56px;
           "
         >
-          {site.projectPage.nextProject}
+          <h2
+            class="section-title"
+            style="margin: 0;"
+          >
+            {site.projectPage.nextProject}
+          </h2>
         </div>
 
-        <a
-          href={`${base}/projekt/${nextProject.slug}`}
-          class="next-project-link"
-          aria-label={`${site.projectPage.nextProject}: ${nextProject.title}`}
-          style="
-            display: block;
-            text-decoration: none;
-            color: inherit;
-          "
-        >
-          <div class="next-project-media-wrap">
-            {nextImage && nextAmbientSrc && (
-              <div class="next-project-ambient" aria-hidden="true">
-                <img
-                  src={nextAmbientSrc}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
-                  draggable="false"
-                  style={`object-position: ${nextImage.objectPosition};`}
-                />
+        <div style="padding: 0 var(--spacing-gutter);">
+          <a
+            href={`${base}/projekt/${nextProject.slug}`}
+            class="next-project-link"
+            aria-label={`${site.projectPage.nextProject}: ${nextProject.title}`}
+            style="
+              display: block;
+              text-decoration: none;
+              color: inherit;
+            "
+          >
+            <div class="next-project-media-wrap">
+              {nextImage && nextAmbientSrc && (
+                <div class="next-project-ambient" aria-hidden="true">
+                  <img
+                    src={nextAmbientSrc}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    draggable="false"
+                    style={`object-position: ${nextImage.objectPosition};`}
+                  />
+                </div>
+              )}
+
+              <div
+                class="next-project-image-box"
+                style="
+                  position: relative;
+                  z-index: 2;
+                  width: 100%;
+                  height: clamp(300px, 45vw, 560px);
+                  overflow: hidden;
+                  border-radius: var(--radius-image);
+                  isolation: isolate;
+                  transform: translateZ(0);
+                  background: var(--color-surface, #e5e5e5);
+                  margin-bottom: 24px;
+                "
+              >
+                {nextImage ? (
+                  <img
+                    src={nextImage.src}
+                    srcset={nextImage.srcset}
+                    sizes="100vw"
+                    width={nextImage.width}
+                    height={nextImage.height}
+                    alt={nextImage.alt}
+                    loading="lazy"
+                    decoding="async"
+                    style={`
+                      width: 100%;
+                      height: 100%;
+                      object-fit: cover;
+                      object-position: ${nextImage.objectPosition};
+                      display: block;
+                    `}
+                  />
+                ) : (
+                  <PlaceholderArt variant="hero" id={nextProject.slug} />
+                )}
               </div>
-            )}
+            </div>
 
             <div
-              class="next-project-image-box"
               style="
                 position: relative;
                 z-index: 2;
-                width: 100%;
-                height: clamp(300px, 45vw, 560px);
-                overflow: hidden;
-                border-radius: var(--radius-image);
-                isolation: isolate;
-                transform: translateZ(0);
-                background: var(--color-surface, #e5e5e5);
-                margin-bottom: 24px;
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
               "
             >
-              {nextImage ? (
-                <img
-                  src={nextImage.src}
-                  srcset={nextImage.srcset}
-                  sizes="100vw"
-                  width={nextImage.width}
-                  height={nextImage.height}
-                  alt={nextImage.alt}
-                  loading="lazy"
-                  decoding="async"
-                  style={`
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    object-position: ${nextImage.objectPosition};
-                    display: block;
-                  `}
-                />
-              ) : (
-                <PlaceholderArt variant="hero" id={nextProject.slug} />
-              )}
+              <span
+                style="
+                  font-size: var(--text-h2);
+                  font-weight: 300;
+                  letter-spacing: -0.03em;
+                "
+              >
+                {nextProject.title}
+              </span>
+              <span class="next-arrow" aria-hidden="true" style="font-size: 28px; opacity: 0.5;">
+                →
+              </span>
             </div>
-          </div>
-
-          <div
-            style="
-              position: relative;
-              z-index: 2;
-              display: flex;
-              justify-content: space-between;
-              align-items: baseline;
-            "
-          >
-            <span
-              style="
-                font-size: var(--text-h2);
-                font-weight: 300;
-                letter-spacing: -0.03em;
-              "
-            >
-              {nextProject.title}
-            </span>
-            <span class="next-arrow" aria-hidden="true" style="font-size: 28px; opacity: 0.5;">
-              →
-            </span>
-          </div>
-        </a>
+          </a>
+        </div>
       </section>
     )}
   </main>
@@ -346,15 +335,170 @@ const projectJsonLd = {
 </Layout>
 
 <style>
+  .project-main {
+    padding-top: 24px;
+  }
+
+  .project-container {
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: var(--spacing-gutter);
+  }
+
+  .project-back-row {
+    margin-bottom: 16px;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+    text-decoration: none;
+    padding: 8px 0;
+  }
+
   .back-link:hover {
     color: var(--color-ink) !important;
   }
+
   .back-link:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 4px;
     border-radius: 2px;
   }
 
+  /* ── 2. Title + Description Two-Column Block ─────────────────── */
+  .project-info-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 36px;
+    align-items: start;
+    padding-top: 16px;
+    padding-bottom: 56px;
+  }
+
+  @media (min-width: 900px) {
+    .project-info-section--two-col {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: clamp(48px, 6vw, 96px);
+    }
+  }
+
+  .project-info-left {
+    min-width: 0;
+  }
+
+  .project-title {
+    font-size: calc(var(--text-h2) - 2pt);
+    font-weight: 300;
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+    margin: 0 0 16px;
+  }
+
+  .project-tagline {
+    font-size: clamp(1.25rem, 2vw, 1.625rem);
+    font-weight: 300;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+    color: var(--color-muted);
+    margin: 0 0 24px;
+  }
+
+  .project-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    margin: 24px 0 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+  }
+
+  .project-meta__item {
+    display: flex;
+    gap: 8px;
+  }
+
+  .project-meta__item dt {
+    color: var(--color-ink-soft);
+  }
+
+  .project-meta__item dd {
+    margin: 0;
+    color: var(--color-ink);
+  }
+
+  .project-description {
+    min-width: 0;
+    max-width: 68ch;
+  }
+
+  .project-description__text {
+    font-size: 20px; /* <-- TAMAÑO DE FUENTE DE LA DESCRIPCIÓN (Beskrivning): cambiá este valor (ej. 18px, 20px, 22px, 24px) */
+    font-weight: 300;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    text-align: justify;
+    hyphens: auto;
+    margin: 0 0 20px;
+  }
+
+  .project-description__text:last-child {
+    margin-bottom: 0;
+  }
+
+  /* ── 3. Technical Specs / Facts Row ("Fakta") ────────────────── */
+  .project-specs-section {
+    padding-top: 40px;
+    padding-bottom: 56px;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .project-specs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 24px;
+    margin: 0;
+  }
+
+  @media (min-width: 768px) {
+    .project-specs-grid {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 32px 28px;
+    }
+  }
+
+  .project-spec-box {
+    min-width: 0;
+  }
+
+  .project-spec-box__label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+    margin: 0 0 10px;
+  }
+
+  .project-spec-box__value {
+    margin: 0;
+    font-size: clamp(1.25rem, 1.8vw, 1.5rem);
+    font-weight: 300;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    color: var(--color-ink);
+  }
+
+  /* ── 5. Next Project ─────────────────────────────────────────── */
   .next-project-media-wrap {
     position: relative;
   }

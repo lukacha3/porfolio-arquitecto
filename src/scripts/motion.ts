@@ -267,9 +267,9 @@ function initAnimations() {
     triggers.push(trigger);
   });
 
-  // Section titles, studio blocks, project description, and floor plans header
+  // Section titles, studio blocks, project info/specs, and floor plans header
   const sections = document.querySelectorAll<HTMLElement>(
-    '#studio, .next-project-section, .project-description, .plans-header'
+    '#studio, .next-project-section, .project-info-section, .project-specs-section, .plans-header'
   );
   sections.forEach((sec) => {
     const trigger = ScrollTrigger.create({
@@ -302,7 +302,7 @@ function destroy() {
   triggers.forEach((t) => t.kill());
   triggers = [];
   ScrollTrigger.getAll().forEach((t) => t.kill());
-  gsap.set('h1, .about-reveal, .project-card, #studio, .next-project-section, .project-description, .plans-header', {
+  gsap.set('h1, .about-reveal, .project-card, #studio, .next-project-section, .project-info-section, .project-specs-section, .plans-header', {
     clearProps: 'all',
   });
 }

@@ -40,7 +40,12 @@ Conexión de la home con datos reales de Sanity:
 
 Página de proyecto con galería horizontal:
 - Rutas dinámicas `/projekt/[slug]` generadas al compilar para cada proyecto publicado en Sanity.
-- Estructura de la página de proyecto: Encabezado (título + fila de datos kategori, år, fotograf) → Descripción (`Beskrivning`, si existe) → Galería de fotos → Planos (`Planritningar`, si existen) → "Nästa projekt" con ciclo al primer proyecto.
+- Estructura de la página de proyecto (alineada bajo un contenedor común `max-width: 1280px`):
+  1. **Galería de fotos** arriba del todo, con contador (`Bild 1 av N`) y controles alineados a la derecha.
+  2. **Bloque de dos columnas (Título + Descripción)**: columna izquierda con el título (`<h1>`), frase descriptiva opcional (`tagline` / *"Kort beskrivning"*, hasta 120 caracteres) y fila de metadatos (*Kategori*, *År*, *Fotograf*); columna derecha con los párrafos de descripción (`description`). Si no hay descripción, la columna izquierda ocupa todo el ancho sin dejar huecos.
+  3. **Fila de datos técnicos / medidas opcional (`specs` / *"Fakta"*)**: grilla responsiva (`repeat(auto-fit, minmax(160px, 1fr))` en desktop y 2 columnas en mobile) de cajas ordenables (`Rubrik` + `Värde`, ej. *Planlösning / 1-plan*, *Boyta / 118,8 kvm*).
+  4. **Planos (`Planritningar`)** con título `.section-title` y carrusel de planos (si existen).
+  5. **"Nästa projekt"** al final con ciclo al primer proyecto y efecto "modo cine" dinámico.
 - Componente de carrusel reutilizable (`src/components/Carousel.astro`), compartido entre la galería de fotos (`src/components/ProjectGallery.astro`) y la sección de planos (`src/components/ProjectPlans.astro`):
   - Inicialización independiente por instancia (`[data-carousel]`) sin IDs duplicados ni selectores globales, permitiendo múltiples carruseles autónomos en una misma página.
   - Proporciones naturales y soporte vertical universal: ancho dinámico proporcional calculado en base al aspect ratio real. Para imágenes horizontales la slide ocupa ~60vw (asomando ~1/4 de las vecinas); para imágenes verticales el contenedor se ajusta sin espacio vacío lateral, logrando que se aprecie la mitad (~50%) de la imagen vertical al asomarse.

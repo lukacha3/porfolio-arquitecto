@@ -56,8 +56,16 @@ export interface SanityPlanImage {
   dimensions?: SanityDimensions | null;
 }
 
+export interface SanityProjectSpec {
+  _key: string;
+  label: string;
+  value: string;
+}
+
 export interface SanityProjectDetail extends SanityProject {
+  tagline?: string | null;
   description?: string | null;
+  specs?: SanityProjectSpec[] | null;
   photographer?: string | null;
   gallery?: SanityCoverImage[] | null;
   hasPlans?: boolean | null;
@@ -155,6 +163,7 @@ export const PROJECT_SLUGS_QUERY = `*[_type == "project" && defined(slug.current
 export const PROJECT_BY_SLUG_QUERY = `*[_type == "project" && slug.current == $slug][0] {
   _id,
   title,
+  tagline,
   "slug": slug.current,
   year,
   "category": category->{
@@ -162,6 +171,11 @@ export const PROJECT_BY_SLUG_QUERY = `*[_type == "project" && slug.current == $s
     "slug": slug.current
   },
   description,
+  "specs": specs[] {
+    _key,
+    label,
+    value
+  },
   photographer,
   coverImage {
     caption,
