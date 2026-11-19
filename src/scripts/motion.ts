@@ -326,6 +326,21 @@ function init() {
   });
 }
 
+// Expose Lenis pause/resume helpers for modal overlays (e.g. lightbox)
+declare global {
+  interface Window {
+    __lenisStop?: () => void;
+    __lenisStart?: () => void;
+  }
+}
+
+window.__lenisStop = () => {
+  lenis?.stop();
+};
+window.__lenisStart = () => {
+  lenis?.start();
+};
+
 // Initialize on DOM ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);

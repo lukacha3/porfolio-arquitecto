@@ -1,0 +1,91 @@
+---
+interface Props {
+  href: string;
+  label: string;
+  ariaLabel: string;
+  hoverColor?: string;
+}
+
+const {
+  href,
+  label,
+  ariaLabel,
+  hoverColor = "var(--color-ground)",
+} = Astro.props;
+---
+
+<div class="contact-link-row">
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="contact-link"
+    aria-label={ariaLabel}
+    style={`--contact-link-hover: ${hoverColor};`}
+  >
+    <span class="contact-link__icon" aria-hidden="true">
+      <slot name="icon" />
+    </span>
+    <span class="contact-link__text">{label}</span>
+  </a>
+</div>
+
+<style>
+  .contact-link-row {
+    display: block;
+  }
+
+  .contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0 6px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    color: var(--color-ink-soft);
+    border-bottom: 1px solid var(--color-ink-soft);
+    text-decoration: none;
+    transition:
+      color 200ms ease,
+      border-color 200ms ease;
+  }
+
+  .contact-link__icon {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .contact-link__icon :global(svg) {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  @media (hover: hover) {
+    .contact-link:hover {
+      color: var(--contact-link-hover);
+      border-bottom-color: var(--contact-link-hover);
+    }
+  }
+
+  .contact-link:focus-visible {
+    color: var(--contact-link-hover);
+    border-bottom-color: var(--contact-link-hover);
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contact-link {
+      transition: none;
+    }
+  }
+</style>

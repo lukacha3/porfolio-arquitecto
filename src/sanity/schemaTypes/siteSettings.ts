@@ -238,6 +238,32 @@ export const siteSettings = defineType({
           scheme: ['http', 'https'],
         }),
     }),
+    defineField({
+      name: 'cvFile',
+      title: 'CV (PDF)',
+      description: 'Ladda upp ditt CV som PDF. Lämna tomt för att dölja knappen.',
+      type: 'file',
+      options: {
+        accept: 'application/pdf',
+      },
+    }),
+    defineField({
+      name: 'cvLabel',
+      title: 'Knapptext för CV',
+      description: "Texten som visas på knappen, t.ex. 'CV' eller 'Curriculum'.",
+      type: 'string',
+      initialValue: 'CV',
+      validation: (Rule) => [
+        Rule.max(30).error('Max 30 tecken'),
+        Rule.custom((value, context) => {
+          const doc = context.document as { cvFile?: { asset?: { _ref?: string } } } | undefined;
+          if (doc?.cvFile?.asset?._ref && (!value || !String(value).trim())) {
+            return 'Knapptext är obligatorisk när en CV-PDF är uppladdad';
+          }
+          return true;
+        }),
+      ],
+    }),
   ],
   preview: {
     select: {

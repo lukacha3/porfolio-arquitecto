@@ -122,6 +122,8 @@ export interface SanitySiteSettings {
   email?: string | null;
   instagram?: string | null;
   linkedin?: string | null;
+  cvUrl?: string | null;
+  cvLabel?: string | null;
   featuredProject?: SanityProject | null;
 }
 
@@ -188,7 +190,9 @@ export const SITE_SETTINGS_QUERY = `*[_type == "siteSettings"][0] {
   services,
   email,
   instagram,
-  linkedin
+  linkedin,
+  cvLabel,
+  "cvUrl": cvFile.asset->url
 }`;
 
 export const PROJECT_SLUGS_QUERY = `*[_type == "project" && defined(slug.current)].slug.current`;
