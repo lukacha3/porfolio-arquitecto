@@ -90,7 +90,7 @@ Pulido final de movimiento, accesibilidad (a11y), rendimiento y SEO:
   - `robots.txt` que bloquea el indexado de `/admin/` y enlaza el sitemap con instrucciones en sueco.
   - Structured Data JSON-LD enriquecido: `ProfessionalService` en la portada y `VisualArtwork` en páginas de proyectos.
   - Etiquetas canónicas (`rel="canonical"`) dinámicas y etiquetas Open Graph / Twitter completas con imágenes reales de Sanity.
-  - **Favicons adaptativos (`public/` y `scripts/generate-favicons.mjs`)**: `favicon.svg` limpio con soporte automático para pestañas claras/oscuras (`prefers-color-scheme: dark`), `favicon.ico` multiresolución (`16×16` y `32×32` con líneas reforzadas para legibilidad en tamaños chicos), `favicon-96x96.png` y `apple-touch-icon.png` (`180×180` con fondo sólido `--color-ground` y margen de ~12%), enlazados en `src/layouts/Layout.astro` respetando el `base` de GitHub Pages (`/porfolio-arquitecto/`).
+  - **Favicons adaptativos (`public/` y `scripts/generate-favicons.mjs`)**: `favicon.svg` limpio con soporte automático para pestañas claras/oscuras (`prefers-color-scheme: dark`), `favicon.ico` multiresolución (`16×16` y `32×32` con líneas reforzadas para legibilidad en tamaños chicos), `favicon-96x96.png` y `apple-touch-icon.png` (`180×180` con fondo sólido `--color-ground` y margen de ~12%), enlazados en `src/layouts/Layout.astro` respetando `import.meta.env.BASE_URL`.
 - **Página 404 personalizada**: Página `404.astro` en sueco ("Sidan kunde inte hittas.") con navegación clara de retorno a la portada.
 - **Barra de navegación superior fija (`src/components/Header.astro`)**:
   - Posicionada con `position: sticky; top: var(--preview-offset, 0px); z-index: 900` para permanecer siempre visible en todas las páginas públicas (home, proyectos y 404) sin superponerse con la barra de modo preview ni con el toast de copiado o el skip-link.
@@ -104,8 +104,8 @@ Pulido final de movimiento, accesibilidad (a11y), rendimiento y SEO:
 
 ### Acceso al Panel (Sanity Studio)
 
-- **Local:** `http://localhost:4321/porfolio-arquitecto/admin`
-- **Producción (GitHub Pages):** `https://lukacha3.github.io/porfolio-arquitecto/admin`
+- **Local:** `http://localhost:4321<BASE_PATH>/admin` (por defecto `http://localhost:4321/porfolio-arquitecto/admin`, o `http://localhost:4321/admin` si `BASE_PATH=/`)
+- **Producción (GitHub Pages):** `https://USUARIO.github.io/REPO/admin` (o `https://tudominio.se/admin` con dominio propio)
 
 ### Variables de Entorno
 
@@ -114,6 +114,10 @@ Crear un archivo `.env` en la raíz (ver `.env.example`):
 ```env
 PUBLIC_SANITY_PROJECT_ID=tu_project_id_aqui
 PUBLIC_SANITY_DATASET=production
+
+# Opcionales (en GitHub Actions se calculan automáticamente desde Pages)
+SITE_URL=
+BASE_PATH=
 
 # Token de lectura para modo preview (opcional para desarrollo normal)
 SANITY_API_READ_TOKEN=tu_token_viewer_aqui
@@ -140,16 +144,79 @@ Los proyectos se ordenan en Sanity Studio arrastrándolos directamente en la lis
 
 ### Configuración de CORS en Sanity
 
-En [sanity.io/manage](https://sanity.io/manage) → Seleccionar tu proyecto → pestaña **API** → **CORS origins**, agregar con "Allow credentials" activado:
+En [sanity.io/manage](https://sanity.io/manage) → Seleccionar tu proyecto → pestaña **API** → **CORS origins**, agregar con **"Allow credentials"** activado:
 
 1. `http://localhost:4321` (desarrollo local)
-2. `https://lukacha3.github.io` (producción GitHub Pages)
+2. `https://USUARIO.github.io` (producción en GitHub Pages)
+3. `https://tudominio.se` y `https://www.tudominio.se` (cuando se configure el dominio propio)
+
+## Fase 8: Proyecto configurable y recompilación automática
+
+### Cómo funciona la recompilación automática
+
+```text
+Sanity Studio (Publish)
+  └─▶ Webhook (POST a GitHub API)
+        └─▶ repository_dispatch (type: sanity-publish)
+              └─▶ GitHub Actions (.github/workflows/deploy.yml)
+                    └─▶ npm run build (SITE_URL / BASE_PATH automáticos)
+                          └─▶ GitHub Pages (sitio actualizado)
+```
+
+El workflow incluye `concurrency: { group: pages, cancel-in-progress: true }`, de modo que si se publican varios cambios seguidos en Sanity, se cancela el build intermedio y solo se despliega la última versión.
+
+### Variables en GitHub (`Settings → Secrets and variables → Actions`)
+
+En la pestaña **Variables** (o Secrets para `PUBLIC_SANITY_PROJECT_ID` si se prefiere):
+- `PUBLIC_SANITY_PROJECT_ID` (obligatoria): ID del proyecto en Sanity.
+- `PUBLIC_SANITY_DATASET` (opcional, por defecto `production`): dataset de Sanity.
+- `SITE_URL` (opcional): override de la URL pública; si no se define, `actions/configure-pages` usa automáticamente el `origin` del repo o dominio configurado.
+- `BASE_PATH` (opcional): override de la ruta base; si no se define, usa el `base_path` de Pages (`/` en dominio propio o `USUARIO.github.io`, `/REPO` en repos de proyecto).
+
+### Crear el Fine-Grained Token y configurar el Webhook en Sanity
+
+1. **Crear el token en GitHub:**
+   - Ir a **GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**.
+   - **Repository access:** *Only select repositories* → elegir `USUARIO/REPO`.
+   - **Permissions → Repository permissions:** **Contents: Read and write** (requerido por GitHub para disparar `repository_dispatch`).
+   - Copiar el token generado (`github_pat_...`).
+2. **Crear el webhook en Sanity (`sanity.io/manage`):**
+   - Seleccionar el proyecto → **API → Webhooks → Create webhook**.
+   - **Name:** `Deploy GitHub Pages`
+   - **URL:** `https://api.github.com/repos/USUARIO/REPO/dispatches`
+   - **Dataset:** `production`
+   - **Trigger on:** `Create`, `Update`, `Delete` (solo documentos publicados).
+   - **HTTP method:** `POST`
+   - **HTTP headers:**
+     - `Authorization`: `Bearer TU_FINE_GRAINED_TOKEN`
+     - `Accept`: `application/vnd.github+json`
+     - `X-GitHub-Api-Version`: `2022-11-28`
+   - **Projection / Payload:**
+     ```json
+     {"event_type": "sanity-publish"}
+     ```
+
+### Checklist de migración a otra cuenta o repositorio
+
+- [ ] Crear o transferir el repositorio en `USUARIO/REPO` y habilitar **Settings → Pages → Source: GitHub Actions**.
+- [ ] Cargar `PUBLIC_SANITY_PROJECT_ID` (y opcionalmente `PUBLIC_SANITY_DATASET`) en **Settings → Secrets and variables → Actions**.
+- [ ] Generar un nuevo **Fine-grained token** en la cuenta destino limitado a `USUARIO/REPO` con permiso **Contents: Read and write**.
+- [ ] Actualizar la URL y el header `Authorization` del webhook en `sanity.io/manage` apuntando a `https://api.github.com/repos/USUARIO/REPO/dispatches`.
+- [ ] Agregar `https://USUARIO.github.io` en **CORS origins** de Sanity (con *Allow credentials* activado).
+- [ ] Ejecutar el workflow manualmente desde **Actions → Deploy to GitHub Pages → Run workflow** y verificar la publicación y `/admin`.
+
+### Checklist para pasar al dominio propio (`.se`)
+
+- [ ] Configurar el **Custom domain** en **GitHub → Settings → Pages** (y los registros DNS correspondientes).
+- [ ] Verificar que `SITE_URL` / `BASE_PATH` no estén forzados con el path anterior en Variables de Actions (`configure-pages` detectará automáticamente `origin = https://tudominio.se` y `base_path = /`).
+- [ ] Agregar `https://tudominio.se` (y `https://www.tudominio.se` si aplica) en **CORS origins** de Sanity con *Allow credentials* activado.
+- [ ] Ejecutar un deploy y comprobar que `robots.txt`, `sitemap-index.xml`, enlaces internos, favicons y `/admin` funcionen bajo la raíz `/`.
 
 ## Comandos
 
 ```bash
 npm install           # Instalar dependencias
-npm run dev           # Iniciar servidor de desarrollo en modo normal (http://localhost:4321/porfolio-arquitecto/)
+npm run dev           # Iniciar servidor de desarrollo
 npm run dev:preview   # Iniciar servidor de desarrollo en modo preview con borradores
 npm run build         # Compilar para producción (solo publicados)
 npm run build:preview # Compilar en modo preview (con borradores)

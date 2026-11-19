@@ -35,7 +35,7 @@ const homeDescription = portableTextToPlainText(
 );
 
 // JSON-LD structured data for Home
-const siteOrigin = Astro.site ? new URL(Astro.site).origin : "https://lukacha3.github.io";
+const siteOrigin = Astro.site ? new URL(Astro.site).origin : Astro.url.origin;
 const sameAs = [siteSettings?.instagram, siteSettings?.linkedin].filter(Boolean) as string[];
 
 const organizationJsonLd = {

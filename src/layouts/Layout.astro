@@ -20,7 +20,7 @@ const {
 } = Astro.props;
 
 // Absolute canonical URL
-const siteOrigin = Astro.site ? new URL(Astro.site).origin : 'https://lukacha3.github.io';
+const siteOrigin = Astro.site ? new URL(Astro.site).origin : Astro.url.origin;
 const canonicalUrl = new URL(Astro.url.pathname, siteOrigin).href;
 ---
 

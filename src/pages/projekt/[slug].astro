@@ -94,7 +94,7 @@ const nextAmbientSrc = nextProject?.coverImage?.asset
   : null;
 
 // JSON-LD structured data for Project
-const siteOrigin = Astro.site ? new URL(Astro.site).origin : "https://lukacha3.github.io";
+const siteOrigin = Astro.site ? new URL(Astro.site).origin : Astro.url.origin;
 const projectUrl = new URL(Astro.url.pathname, siteOrigin).href;
 
 const projectJsonLd = {
