@@ -190,18 +190,17 @@ export const siteSettings = defineType({
     defineField({
       name: 'about',
       title: 'Om studion',
+      description: 'Lämna tomt för att dölja sektionen Studion på startsidan (visas om minst ett av fälten Om studion eller Tjänster är ifyllt).',
       type: 'text',
       rows: 4,
-      initialValue:
-        'Arkitektstudio som följer projektet hela vägen, från första skiss till byggledning. Färre gester, mer precision.',
     }),
     defineField({
       name: 'services',
       title: 'Tjänster',
+      description: 'Upp till 3 tjänster. Lämna tomt för att dölja om även Om studion är tomt.',
       type: 'array',
       of: [defineArrayMember({ type: 'string' })],
       validation: (Rule) => Rule.max(3).error('Max 3 tjänster tillåtna'),
-      initialValue: ['Projektering', 'Byggledning', 'Interiör'],
     }),
     defineField({
       name: 'featuredProject',

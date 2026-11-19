@@ -4,6 +4,7 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { site } from "../data/site";
 import { getSiteSettings } from "../lib/queries";
+import { hasStudioContent } from "../lib/studio";
 
 let siteSettings = null;
 try {
@@ -13,6 +14,7 @@ try {
 }
 
 const studioName = siteSettings?.studioName || site.studioName;
+const showStudio = hasStudioContent(siteSettings);
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 ---
 
@@ -20,7 +22,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   title={`404 — ${studioName}`}
   description="Sidan kunde inte hittas."
 >
-  <Header studioName={studioName} />
+  <Header studioName={studioName} showStudio={showStudio} />
 
   <main
     id="main"

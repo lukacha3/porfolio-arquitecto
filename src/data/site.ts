@@ -42,13 +42,6 @@ export const site = {
 
   studio: {
     label: "Studion",
-    statement:
-      "Arkitektstudio som följer projektet hela vägen, från första skiss till byggledning. Färre gester, mer precision.",
-    services: [
-      { number: "01", name: "Projektering", body: "Förslag, bygghandlingar och bygglov." },
-      { number: "02", name: "Byggledning", body: "Uppföljning på byggplatsen och kvalitetskontroll." },
-      { number: "03", name: "Interiör", body: "Rum, möbler och detaljer efter mått." },
-    ],
   },
 
   footer: {

@@ -7,14 +7,15 @@ import ProjectCard from "./ProjectCard.astro";
 interface Props {
   projects: SanityProject[];
   categories: SanityCategory[];
+  hasStudio?: boolean;
 }
 
-const { projects, categories } = Astro.props;
+const { projects, categories, hasStudio = true } = Astro.props;
 ---
 
 <section
   id="projekt"
-  style="margin-top: 92px; padding: 48px var(--spacing-gutter) 0;"
+  style={`margin-top: 92px; padding: 48px var(--spacing-gutter) ${hasStudio ? "0" : "clamp(88px, 9vw, 120px)"};`}
 >
   <!-- Section header -->
   <div

@@ -190,7 +190,7 @@ function getEducationLogoProps(
     .about-section--with-portrait .about-grid {
       grid-template-columns: 1.3fr 1fr;
       gap: clamp(48px, 6vw, 100px);
-      align-items: stretch;
+      align-items: start;
     }
   }
 
@@ -370,14 +370,15 @@ function getEducationLogoProps(
   .about-portrait {
     margin: 0;
     width: 100%;
-    background: transparent;
+    border-radius: var(--radius-image);
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--color-surface, transparent);
   }
 
   .about-portrait img {
     width: 100%;
     height: auto;
-    object-fit: contain;
-    border-radius: var(--radius-image);
     display: block;
   }
 
@@ -388,22 +389,12 @@ function getEducationLogoProps(
       top: 0px;  /* <-- Positivo = abajo, Negativo = arriba (ej. -20px o 20px) */
       max-width: none;
       margin-inline: 0;
-      align-self: stretch;
+      align-self: start;
     }
 
     .about-portrait {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      justify-content: flex-end;
-      align-items: stretch;
-    }
-
-    .about-portrait img {
-      width: auto;
+      width: 100%;
       max-width: 100%;
-      height: 100%;
-      object-fit: contain;
     }
   }
 

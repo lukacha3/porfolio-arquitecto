@@ -1,120 +1,91 @@
 ---
 import { site } from "../data/site";
+import { getStudioParagraphs, getStudioServices } from "../lib/studio";
 
 interface Props {
   about?: string | null;
-  services?: string[] | null;
+  services?: (string | null | undefined)[] | null;
 }
 
 const { about, services } = Astro.props;
-const statementText = about || site.studio.statement;
-const paragraphs = statementText.split(/\r?\n+/).filter(Boolean);
-
-// Take up to 3 services from Sanity or fallback
-const sanityServices = services && services.length > 0 ? services.slice(0, 3) : null;
+const paragraphs = getStudioParagraphs(about);
+const sanityServices = getStudioServices(services);
+const hasContent = paragraphs.length > 0 || sanityServices.length > 0;
 ---
 
-<section
-  id="studio"
-  style="
-    margin-top: 112px;
-    padding: 48px var(--spacing-gutter) 120px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 48px;
-  "
->
-  <!-- Label column -->
-  <div style="flex: 1 1 240px;">
-    <h2
-      class="section-title"
-      style="margin: 0;"
-    >
-      {site.studio.label}
-    </h2>
-  </div>
-
-  <!-- Main column -->
-  <div style="flex: 3 1 480px; min-width: 0;">
-    <!-- Statement with paragraphs -->
-    <div style="max-width: 28ch; margin: 0 0 80px;">
-      {paragraphs.map((para) => (
-        <p
-          class="section-title"
-          style="margin: 0 0 24px;"
-        >
-          {para}
-        </p>
-      ))}
+{hasContent && (
+  <section
+    id="studio"
+    style="
+      margin-top: 112px;
+      padding: 48px var(--spacing-gutter) 120px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 48px;
+    "
+  >
+    <!-- Label column -->
+    <div style="flex: 1 1 240px;">
+      <h2
+        class="section-title"
+        style="margin: 0;"
+      >
+        {site.studio.label}
+      </h2>
     </div>
 
-    <!-- Services -->
-    <ul
-      style="
-        display: flex;
-        flex-wrap: wrap;
-        row-gap: 40px;
-        column-gap: 32px;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-      "
-    >
-      {sanityServices ? (
-        sanityServices.map((serviceName, index) => (
-          <li
-            style="
-              flex: 1 1 200px;
-              border-top: 1px solid var(--color-line);
-              padding-top: 16px;
-            "
-          >
+    <!-- Main column -->
+    <div style="flex: 3 1 480px; min-width: 0;">
+      <!-- Statement with paragraphs -->
+      {paragraphs.length > 0 && (
+        <div style={`max-width: 28ch; margin: 0 0 ${sanityServices.length > 0 ? "80px" : "0"};`}>
+          {paragraphs.map((para) => (
             <p
-              style="
-                font-family: var(--font-mono);
-                font-size: 12px;
-                text-transform: uppercase;
-                letter-spacing: 0.08em;
-                margin: 0 0 12px;
-              "
+              class="section-title"
+              style="margin: 0 0 24px;"
             >
-              {String(index + 1).padStart(2, "0")} {serviceName}
+              {para}
             </p>
-          </li>
-        ))
-      ) : (
-        site.studio.services.map((service) => (
-          <li
-            style="
-              flex: 1 1 200px;
-              border-top: 1px solid var(--color-line);
-              padding-top: 16px;
-            "
-          >
-            <p
-              style="
-                font-family: var(--font-mono);
-                font-size: 12px;
-                text-transform: uppercase;
-                letter-spacing: 0.08em;
-                margin: 0 0 12px;
-              "
-            >
-              {service.number} {service.name}
-            </p>
-            <p
-              style="
-                font-size: 15px;
-                line-height: 1.5;
-                color: var(--color-muted);
-                margin: 0;
-              "
-            >
-              {service.body}
-            </p>
-          </li>
-        ))
+          ))}
+        </div>
       )}
-    </ul>
-  </div>
-</section>
+
+      <!-- Services -->
+      {sanityServices.length > 0 && (
+        <ul
+          style="
+            display: flex;
+            flex-wrap: wrap;
+            row-gap: 40px;
+            column-gap: 32px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+          "
+        >
+          {sanityServices.map((serviceName, index) => (
+            <li
+              style="
+                flex: 1 1 200px;
+                border-top: 1px solid var(--color-line);
+                padding-top: 16px;
+              "
+            >
+              <p
+                style="
+                  font-family: var(--font-mono);
+                  font-size: 12px;
+                  text-transform: uppercase;
+                  letter-spacing: 0.08em;
+                  margin: 0 0 12px;
+                "
+              >
+                {String(index + 1).padStart(2, "0")} {serviceName}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
+)}

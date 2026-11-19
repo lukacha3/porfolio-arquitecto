@@ -15,6 +15,7 @@ import {
   type SanitySiteSettings,
 } from "../../lib/queries";
 import { getImageProps } from "../../lib/images";
+import { hasStudioContent } from "../../lib/studio";
 import { urlFor } from "../../lib/sanity";
 
 export async function getStaticPaths() {
@@ -109,7 +110,7 @@ const projectJsonLd = {
 ---
 
 <Layout title={pageTitle} description={metaDescription} image={ogImageUrl} jsonLd={projectJsonLd}>
-  <Header studioName={studioName} />
+  <Header studioName={studioName} showStudio={hasStudioContent(siteSettings)} />
 
   <main id="main" class="project-main">
     <!-- Back link -->

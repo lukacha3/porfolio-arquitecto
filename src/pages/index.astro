@@ -8,6 +8,7 @@ import Footer from "../components/Footer.astro";
 import { site } from "../data/site";
 import { getProjects, getCategories, getSiteSettings } from "../lib/queries";
 import { portableTextToPlainText } from "../lib/portableText";
+import { hasStudioContent } from "../lib/studio";
 import { urlFor } from "../lib/sanity";
 
 const [projects, categories, siteSettings] = await Promise.all([
@@ -47,6 +48,7 @@ const organizationJsonLd = {
   ...(siteSettings?.email ? { email: siteSettings.email } : {}),
   ...(sameAs.length > 0 ? { sameAs } : {}),
 };
+const showStudio = hasStudioContent(siteSettings);
 ---
 
 <Layout
@@ -55,7 +57,7 @@ const organizationJsonLd = {
   image={ogImage}
   jsonLd={organizationJsonLd}
 >
-  <Header studioName={siteSettings?.studioName} />
+  <Header studioName={siteSettings?.studioName} showStudio={showStudio} />
 
   <main id="main">
     <AboutSection
@@ -70,11 +72,14 @@ const organizationJsonLd = {
     <ProjectGrid
       projects={projects}
       categories={categories}
+      hasStudio={showStudio}
     />
-    <StudioSection
-      about={siteSettings?.about}
-      services={siteSettings?.services}
-    />
+    {showStudio && (
+      <StudioSection
+        about={siteSettings?.about}
+        services={siteSettings?.services}
+      />
+    )}
   </main>
 
   <Footer
