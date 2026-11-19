@@ -104,7 +104,7 @@ Pulido final de movimiento, accesibilidad (a11y), rendimiento y SEO:
 
 ### Acceso al Panel (Sanity Studio)
 
-- **Local:** `http://localhost:4321<BASE_PATH>/admin` (por defecto `http://localhost:4321/porfolio-arquitecto/admin`, o `http://localhost:4321/admin` si `BASE_PATH=/`)
+- **Local:** `http://localhost:4321<BASE_PATH>/admin` (por defecto `http://localhost:4321/pedrocforsberg.github.io/admin`, o `http://localhost:4321/admin` si `BASE_PATH=/`)
 - **Producción (GitHub Pages):** `https://USUARIO.github.io/REPO/admin` (o `https://tudominio.se/admin` con dominio propio)
 
 ### Variables de Entorno
