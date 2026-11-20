@@ -45,7 +45,7 @@ export const site = {
   },
 
   footer: {
-    closing: "Mina kontakter",
+    closing: "Kontakt",
     email: "pedrocforsberg99@gmail.com",
     copyright: "© Pedro Forsberg Arkitekt",
     copyEmailTooltip: "Klicka för att kopiera",
